@@ -11,7 +11,7 @@ from code.__init__ import print_hello_world
 ###########################################################################
 # Code
 ###########################################################################
-ext = "I'm located at - "+os.path.dirname(os.path.realpath(__file__))
+ext = f"I'm located at - {os.path.dirname(os.path.realpath(__file__))}"
 
 
 ###########################################################################
