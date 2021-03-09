@@ -11,11 +11,11 @@ from code.__init__ import print_hello_world
 ###########################################################################
 # Code
 ###########################################################################
-ext = os.path.dirname(os.path.realpath(__file__))
+ext = "I'm located at - "+os.path.dirname(os.path.realpath(__file__))
 
 
 ###########################################################################
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    print_hello_world(f'I am located at {ext}')
+    print_hello_world(ext)
