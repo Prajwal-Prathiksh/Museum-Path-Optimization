@@ -14,7 +14,13 @@ This repository represents the work done as part of the course project for AE - 
 ```
 .
 ├───code
+│   ├───ant_colony
+│   ├───base
+│   ├───branch_and_bound
+│   ├───genetic
+│   └───simulated_annealing
 ├───data
-└───output
-    └───figures
+├───output
+│   └───figures
+└───reports
 ```
