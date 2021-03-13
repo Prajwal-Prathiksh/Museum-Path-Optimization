@@ -1,10 +1,9 @@
+import copy
 import numpy as np
 from queue import PriorityQueue
 
-# `N` is the total number of total nodes on the graph or cities on the map
-N = 5
-COST_MATRIX = []
 INF = np.infty
+N = 5  # Number of exhibits
 
 
 class Node():
@@ -12,44 +11,57 @@ class Node():
     """
 
     def __init__(self, tour, reduced_matrix, cost, Id, level):
-        self.tour = tour  # stores edges of the state-space tree; help in tracing the path when the answer is found
-        self.reduced_matrix = reduced_matrix
+        # stores edges of the state-space tree; help in tracing the path when the answer is found
+        self.tour = copy.deepcopy(tour)
+        self.reduced_matrix = copy.deepcopy(reduced_matrix)
         self.cost = cost  # stores the lower bound
         self.Id = Id  # vertex -> stores the current city number
         self.level = level  # stores the total number of cities visited so far
 
+    def __gt__(self, other):
+        if(self.cost > other.cost):
+            return True
+        else:
+            return False
+
+    def __lt__(self, other):
+        if(self.cost < other.cost):
+            return True
+        else:
+            return False
+
     def debug(self):
-        print(self.tour, self.cost, self.Id, self.level)
+        print("Tour: {} has a cost {} for node {} at level {}".format(
+            self.tour, self.cost, self.Id, self.level))
 
 
 def CreateNode(parent_matrix, tour, level, i, j):
     """Function to allocate a new node `(i, j)` corresponds to visiting city `j` from city `i`
 
     Args:
-        parent_matrix ([type]): [description]
-        tour ([type]): [description]
-        level ([type]): [description]
-        i ([type]): [description]
-        j ([type]): [description]
+        parent_matrix (N*N matrix): penalty matrix
+        tour (list of [i,j]): edges visited till the node
+        level (int): the total number of cities visited so far
+        i (int): come from node Id
+        j (int): goto node Id
 
     Returns:
-        Node: [description]
+        Node
     """
-    node = Node(tour, 0, 0, 0, 0)
-    # node.tour = tour
+    node = Node(tour, [], 0, 0, 0)
     if level != 0:  # skip for the root node
         node.tour.append([i, j])
-    node.reduced_matrix = parent_matrix
+    node.reduced_matrix = copy.deepcopy(parent_matrix)
 
-    # // Change all entries of row `i` and column `j` to `INFINITY`
-    # // skip for the root node
+    # Change all entries of row `i` and column `j` to `INFINITY`
+    # skip for the root node
     if level != 0:
         for k in range(N):
             node.reduced_matrix[i][k] = INF
             node.reduced_matrix[k][j] = INF
 
-    # // Set `(j, 0)` to `INFINITY`
-    # // here start node is 0
+    # Set `(j, 0)` to `INFINITY`
+    # here start node is 0
     node.reduced_matrix[j][0] = INF
 
     # set number of cities visited so far
@@ -100,6 +112,7 @@ def matrix_reduction(node):
     for i in range(N):
         if row[i] != INF:
             cost += row[i]
+        if col[i] != INF:
             cost += col[i]
 
     node.cost = cost
@@ -107,7 +120,13 @@ def matrix_reduction(node):
 
 # to be editted
 def print_tour(node):
-    print(node.tour)
+    if node.level == N-1:
+        print()
+        print("The optimal tour is:")
+        for i in range(N):
+            print(node.tour[i][0], "-->", node.tour[i][1])
+    else:
+        print(node.tour)
 
 
 def solve(cost_matrix):
@@ -125,9 +144,9 @@ def solve(cost_matrix):
     live_nodes.put((root.cost, root))  # add root to the list of live nodes
 
     while not live_nodes.empty():
-        # a live node with the least estimated cost
+        # a live node with the least estimated cost is selected
         minimum = live_nodes.get()[1]
-        # minimum.debug() ##########
+        minimum.debug()
 
         i = minimum.Id  # `i` stores the current city number
 
@@ -136,6 +155,7 @@ def solve(cost_matrix):
             minimum.tour.append([i, 0])  # return to starting city
             print_tour(minimum)
             return minimum.cost  # optimal cost
+            break
 
         # do for each child of min
         # `(i, j)` forms an edge in a space tree
@@ -147,9 +167,13 @@ def solve(cost_matrix):
 
                 # calculate the cost
                 matrix_reduction(branch_node)
-                print(branch_node.cost)
+
                 branch_node.cost += minimum.cost + minimum.reduced_matrix[i][j]
-                print(branch_node.cost)
+
+                # # For debugging
+                # print("Branch node cost: ", branch_node.cost, "minimum.cost", minimum.cost,
+                #       "minimum.reduced_matrix[i][j]", minimum.reduced_matrix[i][j])
+
                 # added the child to list of live nodes
                 live_nodes.put((branch_node.cost, branch_node))
 
@@ -157,15 +181,36 @@ def solve(cost_matrix):
 
 
 def main():
+
+    # COST_MATRIX = [
+    #     [INF, 10, 8, 9, 7],
+    #     [10, INF, 10, 5, 6],
+    #     [8, 10, INF, 8, 9],
+    #     [9, 5, 8, INF, 6],
+    #     [7, 6, 9, 6, INF]
+    # ]  # optimal cost is 34
+
+    # COST_MATRIX = [
+    #     [INF, 3, 1, 5, 8],
+    #     [3, INF, 6, 7, 9],
+    #     [1, 6, INF, 4, 2],
+    #     [5, 7, 4, INF, 3],
+    #     [8, 9, 2, 3, INF]
+    # ]  # optimal cost is 16
+
     COST_MATRIX = [
-        [INF, 10, 8, 9, 7],
-        [10, INF, 10, 5, 6],
-        [8, 10, INF, 8, 9],
-        [9, 5, 8, INF, 6],
-        [7, 6, 9, 6, INF]
-    ]  # optimal cost is 34
+        [INF, 2, 1, INF],
+        [2, INF, 4, 3],
+        [1, 4, INF, 2],
+        [INF, 3, 2, INF]
+    ]  # optimal cost is 8
+
+    # `N` is the total number of total nodes on the graph or cities on the map
+    global N
+    N = len(COST_MATRIX)
 
     print("Total cost is {}".format(solve(COST_MATRIX)))
 
 
-main()
+if __name__ == '__main__':
+    main()
