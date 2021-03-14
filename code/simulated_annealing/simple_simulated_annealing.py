@@ -2,14 +2,12 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import time  # Insert this when you have any local imports
+import numpy as np
+import matplotlib.pyplot as plt
 import os
 import sys
 sys.path.insert(0, os.getcwd())
-
-import time
-import numpy as np
-import matplotlib.pyplot as plt
-
 
 ###########################################################################
 # Code
@@ -17,6 +15,55 @@ import matplotlib.pyplot as plt
 OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'figures', 'simulated_annealing'
 )
+
+
+def get_cost_between_two_points(p1, p2, cost_matrix):
+    '''
+        Calculates the cost between two nodes from the cost matrix.
+
+        Parameters:
+        -----------
+        p1: (int)
+            Node 1 - index
+        p2: (int)
+            Node 2 - index
+        cost_matrix: (Square Array)
+
+        Returns:
+        --------
+        cost: (float)
+            Cost between two nodes
+    '''
+    # Calculate cost
+    cost = cost_matrix[p1][p2]
+    return cost
+
+
+def get_total_cost(node_list, cost_matrix):
+    '''
+        Calculates the cost of the entire node list.
+
+        Parameters:
+        -----------
+        node_list: (List)
+            List of nodes which are to be traversed
+        cost_matrix: (Square Array)
+
+        Returns:
+        --------
+        total_cost: (float)
+            Total cost of the entire node list
+    '''
+    cost = 0.0
+    for first, second in zip(node_list[:-1], node_list[1:]):
+        # Distance between successive exhibits are added
+        cost += get_cost_between_two_points(first, second, cost_matrix)
+
+    # Distance between the first and the last exhibits is added
+    cost += get_cost_between_two_points(
+        node_list[0], node_list[-1], cost_matrix
+    )
+    return cost
 
 
 class Coordinate:
@@ -192,9 +239,11 @@ class SimpleSimulatedAnnealing:
             Number of epochs
         N: (int)
             Number of iterations per epoch
+        **kwargs:
+            Additional arguments for `func0`
     '''
 
-    def __init__(self, func0, x0, T0, alpha, epochs, N):
+    def __init__(self, func0, x0, T0, alpha, epochs, N, **kwargs):
         '''
             Parameters:
             -----------
@@ -210,6 +259,8 @@ class SimpleSimulatedAnnealing:
                 Number of epochs
             N: (int)
                 Number of iterations per epoch
+            **kwargs:
+                Additional arguments for `func0`
         '''
         self.func0 = func0
         self.x0 = x0.copy()
@@ -221,7 +272,7 @@ class SimpleSimulatedAnnealing:
         self.len_x0 = len(x0)
 
         # Run Algorithm
-        self.xf, self.cost_hist, self.rt = self.run_algorithm()
+        self.xf, self.cost_hist, self.rt = self.run_algorithm(**kwargs)
 
     def cooling_func(self, T):
         '''
@@ -240,7 +291,7 @@ class SimpleSimulatedAnnealing:
         T_cooled = T * self.alpha
         return T_cooled
 
-    def plot_cost_hist(self):
+    def plot_cost_hist(self, ext=''):
         '''
             Plot the history of cost of the objective function per epoch.
 
@@ -257,11 +308,11 @@ class SimpleSimulatedAnnealing:
         ax1.title.set_text(f'Cost vs Epoch | Runtime: {round(self.rt,1)} s')
         ax1.set(xlabel=r'Epochs $\rightarrow$', ylabel='Cost')
 
-        fname = os.path.join(OUTPUT_DIR, 'SSA_cost_hist.png')
+        fname = os.path.join(OUTPUT_DIR, f'{ext}SSA_cost_hist.png')
         plt.savefig(fname, dpi=400, bbox_inches='tight')
         plt.show()
 
-    def run_algorithm(self):
+    def run_algorithm(self, **kwargs):
         '''
             A simple Simulated Annealing algorithm.
 
@@ -275,7 +326,7 @@ class SimpleSimulatedAnnealing:
                 Runtime of the algorithm in fractional seconds
         '''
         x = self.x0.copy()
-        cost0 = self.func0(x)
+        cost0 = self.func0(x, **kwargs)
         T = self.T0
 
         np.random.seed()  # Reset seed
@@ -298,7 +349,7 @@ class SimpleSimulatedAnnealing:
                 x[e2] = temp
 
                 # Get the new cost
-                cost1 = self.func0(x)
+                cost1 = self.func0(x, **kwargs)
 
                 if cost1 < cost0:
                     cost0 = cost1
@@ -322,18 +373,45 @@ class SimpleSimulatedAnnealing:
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-
-    # Generate random coordinates
-    initial_coords = Coordinate.random_coordinates_list(80, seed=0)
+    from code.data_input.base_input import BaseInputLoader
 
     # Set-up parameters for the Simulated Annealing Algorithm
-    T0, alpha, outer_N, inner_N = [40, 0.99, 1000, 100]
+    T0, alpha, outer_N, inner_N = [40, 0.99, 1000, 200]
+
+    # ---------------------------------------------------------------------
+    # Generate random coordinates
+    # initial_coords = Coordinate.random_coordinates_list(80, seed=0)
+
+    # Set up Simulated Annealing Class
+    # optim_solution = SimpleSimulatedAnnealing(
+    #     func0=Coordinate.get_total_distance, x0=initial_coords, T0=T0,
+    #     alpha=alpha, epochs=outer_N, N=inner_N
+    # )
+
+    # optim_solution.plot_cost_hist()
+    # Coordinate.plot_solution(initial_coords, optim_solution.xf)
+
+    # ---------------------------------------------------------------------
+
+    # Read data off of standard library
+    fpath = os.path.join(os.getcwd(), 'code', 'data_input', 'test_load_list')
+    loader = BaseInputLoader(fpath)
+
+    fpath = os.path.join(os.getcwd(), 'code', 'data_input', 'test_load_list')
+    loader = BaseInputLoader(fpath)
+    cost_matrix = loader.get_input_test_case(1).get_cost_matrix()
+
+    num_nodes = np.shape(cost_matrix)[0]
+
+    np.random.seed(0)
+    initial_soln = np.random.permutation(np.arange(num_nodes))
+
+    print('Loaded Input!')
 
     # Set up Simulated Annealing Class
     optim_solution = SimpleSimulatedAnnealing(
-        func0=Coordinate.get_total_distance, x0=initial_coords, T0=T0,
-        alpha=alpha, epochs=outer_N, N=inner_N
+        func0=get_total_cost, x0=initial_soln, T0=T0,
+        alpha=alpha, epochs=outer_N, N=inner_N, cost_matrix=cost_matrix
     )
 
-    optim_solution.plot_cost_hist()
-    Coordinate.plot_solution(initial_coords, optim_solution.xf)
+    optim_solution.plot_cost_hist(ext='node_')
