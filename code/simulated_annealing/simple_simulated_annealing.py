@@ -2,12 +2,12 @@
 # Imports
 ###########################################################################
 # Standard library imports
-import time  
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
-sys.path.insert(0, os.getcwd()) # Insert this when you have any local imports
+sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
 ###########################################################################
 # Code
