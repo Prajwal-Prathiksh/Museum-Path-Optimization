@@ -38,5 +38,6 @@ $ python code\simulated_annealing\simple_simulated_annealing.py
 ├───data
 ├───output
 │   └───figures
+│       └───simulated_annealing
 └───reports
 ```

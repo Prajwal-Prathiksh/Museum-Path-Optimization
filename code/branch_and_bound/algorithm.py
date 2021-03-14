@@ -11,7 +11,8 @@ class Node():
     """
 
     def __init__(self, tour, reduced_matrix, cost, Id, level):
-        # stores edges of the state-space tree; help in tracing the path when the answer is found
+        # stores edges of the state-space tree; help in tracing the path when
+        # the answer is found
         self.tour = copy.deepcopy(tour)
         self.reduced_matrix = copy.deepcopy(reduced_matrix)
         self.cost = cost  # stores the lower bound
@@ -120,7 +121,7 @@ def matrix_reduction(node):
 
 # to be editted
 def print_tour(node):
-    if node.level == N-1:
+    if node.level == N - 1:
         print()
         print("The optimal tour is:")
         for i in range(N):
