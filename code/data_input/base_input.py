@@ -186,10 +186,11 @@ if __name__ == '__main__':
     loader = BaseInputLoader(fpath)
     print('\n\nTest Cases:')
     print('=================================================================')
-    print(loader.get_input_test_cases())
+    for item in loader.get_input_test_cases():
+        print(f'{item} : {loader.get_input_test_cases()[item]}')
     print('\n\nCost Matrices:')
     print('=================================================================')
-    for i in range(len(loader.get_input_test_cases())):
-        print(f'<<<< Cost Matrix - {i+1} >>>>')
-        print(loader.get_input_test_case(i + 1).get_cost_matrix())
+    for idx in range(len(loader.get_input_test_cases())):
+        print(f'<<<< Cost Matrix - {idx+1} >>>>')
+        print(loader.get_input_test_case(idx + 1).get_cost_matrix())
         print('\n')
