@@ -1,5 +1,6 @@
 from data_containers.TSPLIB_data_container import TsplibXMLFileContainer
 
+
 class BaseInputData:
     def __init__(self, file_read_cont):
         self.dataset_name = ''
@@ -15,18 +16,33 @@ class BaseInputData:
     def get_dataset_name(self):
         return self.dataset_name
 
+
 class TSPLIBCostMatrixInput(BaseInputData):
     def __init__(self, file_read_cont):
-        BaseInputData.__init__(self,file_read_cont)
+        BaseInputData.__init__(self, file_read_cont)
 
     def get_cost_matrix(self):
         return self.cost_data['cost_matrix']
 
+
 class BaseInputLoader:
+    '''
+        BaseInputLoader Class
+        ----------------
+        To be used to load test cases from file.
+
+        Parameters:
+        -----------
+        load_list_path: (str)
+            path of file which conttains paths of all test case data files. First line of file 
+            should be 'TSPLIB_XML' for now. Rest of the lines should be paths to test cases
+    '''
+
     def __init__(self, load_list_path):
         self.input_class = BaseInputData
         self.file_read_type = TsplibXMLFileContainer
-        self.file_type_map = {'TSPLIB_XML':[TsplibXMLFileContainer, TSPLIBCostMatrixInput]}
+        self.file_type_map = {'TSPLIB_XML': [
+            TsplibXMLFileContainer, TSPLIBCostMatrixInput]}
         self.file_reader_list = []
         self.input_test_cases = {}
 
@@ -53,7 +69,8 @@ class BaseInputLoader:
 
     def generate_input_test_cases(self):
         for i in range(len(self.file_reader_list)):
-            self.input_test_cases['TEST_CASE_'+str(i+1)] = self.input_class(self.file_reader_list[i])
+            self.input_test_cases['TEST_CASE_' +
+                                  str(i+1)] = self.input_class(self.file_reader_list[i])
 
     def get_input_test_cases(self):
         return self.input_test_cases

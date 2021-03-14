@@ -1,5 +1,6 @@
 from xml.dom import minidom
 
+
 class FileReadContainer:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -13,6 +14,7 @@ class FileReadContainer:
 
     def process_file_data(self):
         pass
+
 
 class XMLFileRead(FileReadContainer):
     def __init__(self, file_path):
