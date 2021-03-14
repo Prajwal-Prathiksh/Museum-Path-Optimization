@@ -19,12 +19,14 @@ OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'simulated_annealing'
 )
 
+
 def function_calls(f):
     def wrapped(*args, **kwargs):
         wrapped.calls += 1
         return f(*args, **kwargs)
     wrapped.calls = 0
     return wrapped
+
 
 @function_calls
 def get_cost_between_two_points(p1, p2, cost_matrix):
@@ -47,6 +49,7 @@ def get_cost_between_two_points(p1, p2, cost_matrix):
     # Calculate cost
     cost = cost_matrix[p1][p2]
     return cost
+
 
 @function_calls
 def get_total_cost(node_list, cost_matrix):
@@ -226,7 +229,7 @@ class Coordinate:
         ax1.title.set_text(f'Initial Solution | Cost = {old_cost}')
         ax2.title.set_text(f'Optimized Solution | Cost = {new_cost}')
 
-        if save == True:
+        if save:
             fname = os.path.join(OUTPUT_DIR, 'SSA_optimized_solution.png')
             plt.savefig(fname, dpi=400, bbox_inches='tight')
 
@@ -278,7 +281,7 @@ class SimpleSimulatedAnnealing:
         '''
         self.func0 = func0
         self.cost0 = round(self.func0(x0, **kwargs), 3)
-        self.func0_calls = 0 # Set number of function calls to zero
+        self.func0_calls = 0  # Set number of function calls to zero
         self.x0 = x0.copy()
         self.T0 = T0
         self.alpha = alpha
@@ -291,8 +294,10 @@ class SimpleSimulatedAnnealing:
         self.xf, self.cost_hist, self.rt = self.run_algorithm(**kwargs)
         self.costf = round(self.cost_hist[-1], 3)
 
-        self.reduction_in_cost = round(np.abs(1 - self.cost0/self.costf)*100, 3)
-        
+        self.reduction_in_cost = round(
+            np.abs(1 - self.cost0 / self.costf) * 100, 3
+        )
+
         self.func0_calls = self.func0.calls
 
     def cooling_func(self, T):
@@ -336,9 +341,13 @@ class SimpleSimulatedAnnealing:
         ax1.title.set_text(f'Cost vs Epoch | Runtime: {self.rt} s')
         ax1.set(xlabel=r'Epochs $\rightarrow$', ylabel='Cost')
 
-        if save == True:
-            fname = os.path.join(OUTPUT_DIR, 'figures', f'{ext}SSA_cost_hist.png')
-            plt.savefig(fname, dpi=400, bbox_inches='tight')
+        if save:
+            fname = os.path.join(
+                OUTPUT_DIR, 'figures', f'{ext}SSA_cost_hist.png'
+            )
+            plt.savefig(
+                fname, dpi=400, bbox_inches='tight'
+            )
 
         plt.show()
 
@@ -406,18 +415,19 @@ class SimpleSimulatedAnnealing:
             Parameters:
             -----------
             N: (int)
-                Number for which the approximate factorial needs to be calculated
+                Number for which the approximate factorial needs to be
+                calculated
 
             Returns:
             --------
             res: (string)
-                Approximate factorial        
+                Approximate factorial
         '''
         P = np.math.factorial(N)
         res = int(np.floor(np.math.log10(P)))
         P = str(P)
         res = f'{P[0]}.{P[1]}{P[2]}e{res}'
-        
+
         return res
 
     @staticmethod
@@ -452,14 +462,15 @@ class SimpleSimulatedAnnealing:
         print(f'Redcution in cost (in %): {reduction_in_cost} %')
 
         T0, alpha = optim_solution.T0, optim_solution.alpha
-        epochs, N_per_epochs = optim_solution.epochs, optim_solution.N_per_epochs
+        epochs = optim_solution.epochs
+        N_per_epochs = optim_solution.N_per_epochs
 
-        if save == True:
+        if save:
             fname = os.path.join(OUTPUT_DIR, f'{ext}SSA_results.npz')
             np.savez(
-                fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len, 
-                permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf, 
-                reduction_in_cost=reduction_in_cost, T0=T0, alpha=alpha, 
+                fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
+                permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
+                reduction_in_cost=reduction_in_cost, T0=T0, alpha=alpha,
                 epochs=epochs, N_per_epochs=N_per_epochs
             )
 
@@ -503,8 +514,8 @@ if __name__ == '__main__':
 
     # Set up Simulated Annealing Class
     optim_solution = SimpleSimulatedAnnealing(
-        func0=get_total_cost, x0=initial_soln, T0=T0,
-        alpha=alpha, epochs=epochs, N_per_epochs=N_per_epochs, cost_matrix=cost_matrix
+        func0=get_total_cost, x0=initial_soln, T0=T0, alpha=alpha,
+        epochs=epochs, N_per_epochs=N_per_epochs, cost_matrix=cost_matrix
     )
 
     SAVE = True
