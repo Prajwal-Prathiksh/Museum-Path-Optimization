@@ -3,6 +3,7 @@
 - [Museum-Path-Optimization](#museum-path-optimization)
   - [Group Members](#group-members)
   - [Description](#description)
+    - [Data Input](#data-input)
     - [Simulated Annealing](#simulated-annealing)
   - [Project Tree](#project-tree)
 
@@ -18,12 +19,19 @@ This repository represents the work done as part of the course project for AE - 
 
 Instructions on running specific algorithms are mentioned below:
 
+### Data Input
+To run the simple simulated annealing algorithm, do the following:
+
+```
+$ python code/data_input/base_input.py
+```
+
 ### Simulated Annealing
 
 To run the simple simulated annealing algorithm, do the following:
 
 ```
-$ python code\simulated_annealing\simple_simulated_annealing.py
+$ python code/simulated_annealing/simple_simulated_annealing.py
 ```
 
 ## Project Tree
@@ -32,10 +40,10 @@ $ python code\simulated_annealing\simple_simulated_annealing.py
 ├───code
 │   ├───ant_colony
 │   ├───branch_and_bound
-│   ├───data_containers
 │   ├───data_input
 │   ├───genetic
-│   └───simulated_annealing
+│   ├───simulated_annealing
+│   └───__pycache__
 ├───data
 │   └───Symmetric_TSPLIB
 ├───output

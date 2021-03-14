@@ -157,7 +157,6 @@ class BaseInputLoader:
 
     def read_tc_paths(self, load_list_path):
         f = open(load_list_path, 'r')
-        print(f'------> {f} ||| {load_list_path}')
         file_type = f.readline()[:-1]
         self.update_file_type(file_type)
         read_paths = f.readlines()
