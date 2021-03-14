@@ -55,8 +55,9 @@ class TsplibXMLFileContainer(BaseTsplibFileContainer, XMLFileRead):
         self.cost_matrix = np.zeros([self.dimension, self.dimension])
         for vert_indx in range(len(vertices)):
             for i in range(1, len(vertices[vert_indx].childNodes), 2):
-                self.cost_matrix[vert_indx, (i + ((i//2) >= (vert_indx))) // 2] = float(
-                    vertices[vert_indx].childNodes[i]._get_attributes().items()[0][1])
+                self.cost_matrix[vert_indx, (i + ((i // 2) >= (vert_indx)))
+                     // 2] = float(vertices[vert_indx].childNodes[i]
+                     ._get_attributes().items()[0][1])
 
         self.update_cost_data()
 

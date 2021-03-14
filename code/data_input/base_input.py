@@ -70,7 +70,7 @@ class BaseInputLoader:
 
     def generate_input_test_cases(self):
         for i in range(len(self.file_reader_list)):
-            self.input_test_cases['TEST_CASE_' + \
+            self.input_test_cases['TEST_CASE_' + 
                 str(i + 1)] = self.input_class(self.file_reader_list[i])
 
     def get_input_test_cases(self):
