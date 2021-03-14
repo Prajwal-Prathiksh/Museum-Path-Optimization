@@ -1,2 +1,8 @@
 TSPLIB_XML
 code/data_input/a280.xml
+data/Symmetric_TSPLIB/att48.xml
+data/Symmetric_TSPLIB/berlin52.xml
+data/Symmetric_TSPLIB/bier127.xml
+data/Symmetric_TSPLIB/brg180.xml
+data/Symmetric_TSPLIB/ch130.xml
+data/Symmetric_TSPLIB/eil101.xml
