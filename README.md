@@ -31,11 +31,13 @@ $ python code\simulated_annealing\simple_simulated_annealing.py
 .
 ├───code
 │   ├───ant_colony
-│   ├───base
 │   ├───branch_and_bound
+│   ├───data_containers
+│   ├───data_input
 │   ├───genetic
 │   └───simulated_annealing
 ├───data
+│   └───Symmetric_TSPLIB
 ├───output
 │   └───figures
 │       └───simulated_annealing
