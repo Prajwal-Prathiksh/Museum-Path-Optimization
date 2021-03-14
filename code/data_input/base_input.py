@@ -180,6 +180,12 @@ class BaseInputLoader:
             return self.input_test_cases[key]
         return None
 
+    def get_test_case_name(self, test_case_no):
+        key = 'TEST_CASE_' + str(test_case_no)
+        if key in self.input_test_cases:
+            return self.input_test_cases[key].dataset_name
+        return None
+
 
 if __name__ == '__main__':
     fpath = os.path.join(os.getcwd(), 'code', 'data_input', 'test_load_list')
