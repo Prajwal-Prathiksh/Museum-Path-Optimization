@@ -184,5 +184,12 @@ class BaseInputLoader:
 if __name__ == '__main__':
     fpath = os.path.join(os.getcwd(), 'code', 'data_input', 'test_load_list')
     loader = BaseInputLoader(fpath)
+    print('\n\nTest Cases:')
+    print('=================================================================')
     print(loader.get_input_test_cases())
-    print(loader.get_input_test_case(1).get_cost_matrix())
+    print('\n\nCost Matrices:')
+    print('=================================================================')
+    for i in range(len(loader.get_input_test_cases())):
+        print(f'<<<< Cost Matrix - {i+1} >>>>')
+        print(loader.get_input_test_case(i + 1).get_cost_matrix())
+        print('\n')

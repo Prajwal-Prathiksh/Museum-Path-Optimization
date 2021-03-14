@@ -20,7 +20,7 @@ This repository represents the work done as part of the course project for AE - 
 Instructions on running specific algorithms are mentioned below:
 
 ### Data Input
-To run the simple simulated annealing algorithm, do the following:
+To generate the test cases obtained using data from standard libraries, do the following:
 
 ```
 $ python code/data_input/base_input.py
