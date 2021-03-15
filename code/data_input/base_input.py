@@ -139,7 +139,7 @@ class BaseInputLoader:
 
     def __init__(self, load_list_path):
         self.OUTPUT_DIR = os.path.join(os.getcwd(), 'data', 'cost_matrices')
-        
+
         self.input_class = BaseInputData
         self.file_read_type = TsplibXMLFileContainer
         self.file_type_map = {'TSPLIB_XML': [
@@ -201,8 +201,8 @@ class BaseInputLoader:
     def store_cost_matrices(self, quiet=False):
         '''
             Stores the cost matrices of all the test cases as `.npz` files.
-            
-            NOTE: 
+
+            NOTE:
                 This runs only if
                     `./data/cost_matrices/`
                 directory does not exist!
@@ -214,34 +214,36 @@ class BaseInputLoader:
         '''
         OUTPUT_DIR = self.OUTPUT_DIR
 
-        if os.path.exists(OUTPUT_DIR) == False:
-            os.mkdir(OUTPUT_DIR)       
+        if os.path.exists(OUTPUT_DIR) is False:
+            os.mkdir(OUTPUT_DIR)
 
             N = self.get_number_of_test_cases()
-            
+
             for i in range(1, N + 1):
                 cost_matrix = self.get_input_test_case(i).get_cost_matrix()
                 test_case_name = self.get_test_case_name(i)
                 fname = os.path.join(OUTPUT_DIR, f'{test_case_name}.npz')
 
-                if quiet == False:
-                    print('======================================================')
+                if not quiet:
+                    print('=================================================')
                     print(test_case_name)
                     print(cost_matrix)
-                    print('======================================================')
+                    print('=================================================')
 
                 np.savez(
-                    fname, test_case_name=test_case_name, cost_matrix=cost_matrix
-                )
-            if quiet == False:
+                    fname,
+                    test_case_name=test_case_name,
+                    cost_matrix=cost_matrix)
+            if not quiet:
                 print('Done: Store all cost matrices.')
+
 
 class TestCaseLoader:
     '''
         TestCaseLoader
         --------------
 
-        To load all the test cases from the 
+        To load all the test cases from the
                 `./data/cost_matrices/`
         subdirectory.
 
@@ -250,7 +252,7 @@ class TestCaseLoader:
         OUTPUT_DIR: (string)
             The absolute path of `./data/cost_matrices/` on one's PC
         test_cases_data: (List)
-            All the test case data, stored as `numpy.lib.npyio.NpzFile` 
+            All the test case data, stored as `numpy.lib.npyio.NpzFile`
             instances
         num_test_cases: (int)
             Total number of test cases which have been loaded
@@ -261,18 +263,19 @@ class TestCaseLoader:
         --------------
         get_test_case_number():
             To obtain the test case number for a given test case name
-        get_test_data(): 
-            To obtain the test name and the cost matrix for a given test case 
+        get_test_data():
+            To obtain the test name and the cost matrix for a given test case
             identifier
     '''
+
     def __init__(self):
         self.OUTPUT_DIR = os.path.join(os.getcwd(), 'data', 'cost_matrices')
         self.test_cases_data = self.__load_test_cases()
         self.num_test_cases = len(self.test_cases_data)
-        
+
         tc_names = []
         for idx in range(self.num_test_cases):
-            data = self.test_cases_data 
+            data = self.test_cases_data
             tc_names.append(str(data[idx]['test_case_name']))
 
         self.names_test_cases = tc_names
@@ -280,20 +283,20 @@ class TestCaseLoader:
     # Private methods
     def __load_test_cases(self):
         '''
-            Load all the test cases from the 
+            Load all the test cases from the
                 `./data/cost_matrices/`
             subdirectory.
 
             Returns:
             --------
             data: (List)
-                All the test case data, stored as `numpy.lib.npyio.NpzFile` 
+                All the test case data, stored as `numpy.lib.npyio.NpzFile`
                 instances
-        '''  
+        '''
         OUTPUT_DIR = self.OUTPUT_DIR
         data = []
         for filename in os.listdir(OUTPUT_DIR):
-            if filename.endswith(".npz"): 
+            if filename.endswith(".npz"):
                 fpath = os.path.join(OUTPUT_DIR, filename)
                 data.append(np.load(fpath))
         return data
@@ -312,7 +315,7 @@ class TestCaseLoader:
             --------
             tc_number: (int)
                 Test case number
-        '''  
+        '''
         N = self.num_test_cases
         tc_number = []
         for idx in range(N):
@@ -327,13 +330,13 @@ class TestCaseLoader:
 
     def get_test_data(self, case_identifier):
         '''
-            Obtain the test name and the cost matrix for a given test case 
+            Obtain the test name and the cost matrix for a given test case
             identifier.
 
             Parameters:
             -----------
             case_identifier: (int/string)
-                Can refer to either the test case number, whose range is 
+                Can refer to either the test case number, whose range is
                 (0, self.num_test_cases) or can  refer to the test case name
 
             Returns:
@@ -342,10 +345,10 @@ class TestCaseLoader:
                 Name of the test case
             cost_matrix: (matrix)
                 Cost matrix
-        '''        
-        if type(case_identifier) == str:
+        '''
+        if isinstance(case_identifier, str):
             tc_number = self.get_test_case_number(case_identifier)
-        elif type(case_identifier) == int:
+        elif isinstance(case_identifier, int):
             tc_number = case_identifier
             if tc_number >= self.num_test_cases or tc_number < 0:
                 msg = f'Enter value between [0, {self.num_test_cases-1}].'
@@ -354,9 +357,10 @@ class TestCaseLoader:
         data = self.test_cases_data[tc_number]
 
         tc_name = str(data['test_case_name'])
-        cost_matrix = data['cost_matrix']        
+        cost_matrix = data['cost_matrix']
 
         return tc_name, cost_matrix
+
 
 ###########################################################################
 # Main Code

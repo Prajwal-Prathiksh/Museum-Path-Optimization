@@ -4,7 +4,8 @@
   - [Group Members](#group-members)
   - [Description](#description)
     - [Data Input](#data-input)
-    - [Simulated Annealing](#simulated-annealing)
+    - [Simple Simulated Annealing](#simple-simulated-annealing)
+    - [Complex Simulated Annealing](#complex-simulated-annealing)
   - [Project Tree](#project-tree)
 
 ## Group Members
@@ -20,18 +21,33 @@ This repository represents the work done as part of the course project for AE - 
 Instructions on running specific algorithms are mentioned below:
 
 ### Data Input
-To generate the test cases obtained using data from standard libraries, do the following:
-
+To generate and store the cost matrices of all the test cases, do the following:
 ```
 $ python code/data_input/base_input.py
 ```
 
-### Simulated Annealing
+### Simple Simulated Annealing
 
 To run the simple simulated annealing algorithm, do the following:
-
 ```
 $ python code/simulated_annealing/simple_simulated_annealing.py
+```
+
+Run the following to get all the command-line arguments:
+```
+$ python code/simulated_annealing/simple_simulated_annealing.py -h
+```
+
+### Complex Simulated Annealing
+
+To run the complex simulated annealing algorithm, do the following:
+```
+$ python code/simulated_annealing/complex_simulated_annealing.py
+```
+
+Run the following to get all the command-line arguments:
+```
+$ python code/simulated_annealing/complex_simulated_annealing.py -h
 ```
 
 ## Project Tree
@@ -41,13 +57,15 @@ $ python code/simulated_annealing/simple_simulated_annealing.py
 │   ├───ant_colony
 │   ├───branch_and_bound
 │   ├───data_input
+│   │   └───__pycache__
 │   ├───genetic
 │   ├───simulated_annealing
 │   └───__pycache__
 ├───data
+│   ├───cost_matrices
 │   └───Symmetric_TSPLIB
 ├───output
-│   └───figures
-│       └───simulated_annealing
+│   └───simulated_annealing
+│       └───figures
 └───reports
 ```
