@@ -64,6 +64,10 @@ def cli_parser():
         default=100, help='Number of iterations per epoch'
     )
     parser.add_argument(
+        '--k', action='store', dest='k', type=float,
+        default=0.6, help='Probability of increasing the exhibits visited'
+    )
+    parser.add_argument(
         '-s', action='store_true', dest='SAVE',
         help='If true, stores any generated plots and the summary data'
     )
@@ -402,7 +406,7 @@ class ComplexSimulatedAnnealing:
 
     def __init__(
         self, func0, check_constraints, coords, x0, loc_bar, velocity, T_max,
-        S, T0, alpha, epochs, N_per_epochs, delta, output_dir,
+        S, T0, alpha, epochs, N_per_epochs, delta, k, output_dir,
         cooling_func='simp', ext='', **kwargs
     ):
         '''
@@ -434,6 +438,8 @@ class ComplexSimulatedAnnealing:
                 Number of iterations per epoch
             delta: (int)
                 Number of iterations after which solution is shaken
+            k: (float)
+                Between (0-1), Probabilty that the number of exhibits visited increases
             output_dir: (string)
                 Absolute path of the output directory
             cooling_func: (string), default=simple
@@ -464,6 +470,7 @@ class ComplexSimulatedAnnealing:
         self.epochs = epochs
         self.N_per_epochs = N_per_epochs
         self.delta = delta
+        self.k = k
         self.ext = ext
 
         # Cooling function
@@ -610,7 +617,7 @@ class ComplexSimulatedAnnealing:
         return x0
 
     @staticmethod
-    def modify_nodes(x, loc_bar):
+    def modify_nodes(x, loc_bar, k):
         '''
             Increases or decreases the exhibits visited
 
@@ -621,6 +628,8 @@ class ComplexSimulatedAnnealing:
             loc_bar: (int)
                 Location of bar, Indicating the number of exhibits being
                 visited
+            k: (float)
+                Probabilty that the location of bar increases
             Returns:
             --------
             New location of bar
@@ -630,7 +639,7 @@ class ComplexSimulatedAnnealing:
         elif(loc_bar == len(x)):
             loc_bar -= 1
         else:
-            if(np.random.random() < 0.6):
+            if(np.random.random() < k):
                 loc_bar += 1
             else:
                 loc_bar -= 1
@@ -656,6 +665,7 @@ class ComplexSimulatedAnnealing:
         T_max = self.T_max
         S = self.S
         T = self.T0
+        k = self.k
         cost = self.func0(x[:loc_bar], S)
 
         apply_swap = ComplexSimulatedAnnealing.apply_swap
@@ -690,7 +700,7 @@ class ComplexSimulatedAnnealing:
             T = self.cooling_func(T, epoch)
 
             for iterator in range(self.N_per_epochs):
-                loc_bar_new = modify_nodes(x, loc_bar)
+                loc_bar_new = modify_nodes(x, loc_bar,k)
                 x_new = apply_shake(x, loc_bar_new)
                 cost_new = self.func0(x_new[:loc_bar_new], S)
 
@@ -855,7 +865,7 @@ if __name__ == '__main__':
     output_dir = make_output_dir(args.output_dir)
 
     # Generate random coordinates, initial solution that satifies constraints
-    velocity, T_max, delta = args.vel, args.T_max, args.delta
+    velocity, T_max, delta, k = args.vel, args.T_max, args.delta, args.k
 
     initial_coords = Coordinate.random_coordinates_list(50, seed=0)
 
@@ -874,8 +884,9 @@ if __name__ == '__main__':
         loc_bar = np.random.randint(1, len(initial_solution))
 
     # Set-up parameters for the Simulated Annealing Algorithm
-    T0, alpha = args.T, args.alpha
+    T0, alpha, k = args.T, args.alpha, args.k
     epochs, N_per_epochs = args.epochs, args.N_per_epochs
+
     SAVE, ext = args.SAVE, args.ext
     cfunc = args.cfunc
 
@@ -894,6 +905,7 @@ if __name__ == '__main__':
         epochs=epochs,
         N_per_epochs=N_per_epochs,
         delta=delta,
+        k=k,
         ext=ext,
         output_dir=output_dir
     )
