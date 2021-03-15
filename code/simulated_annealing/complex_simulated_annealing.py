@@ -21,11 +21,13 @@ OUTPUT_DIR = os.path.join(
 )
 CFUNCS = ['simp', 'exp']
 
+
 def make_output_dir(folder_name, OUTPUT_DIR=OUTPUT_DIR):
     output_dir = os.path.join(OUTPUT_DIR, folder_name)
     if os.path.exists(output_dir) is False:
         os.mkdir(output_dir)
     return output_dir
+
 
 def cli_parser():
     parser = argparse.ArgumentParser(
@@ -278,7 +280,7 @@ class Coordinate:
     @staticmethod
     def plot_solution(
         initial_coords, initial_solution, loc_bar, final_solution,
-        final_loc_bar, S, output_dir, ext='', save=False, 
+        final_loc_bar, S, output_dir, ext='', save=False,
     ):
         '''
             Plots the inital and the optimized solution in a convinient format.
@@ -400,7 +402,7 @@ class ComplexSimulatedAnnealing:
 
     def __init__(
         self, func0, check_constraints, coords, x0, loc_bar, velocity, T_max,
-        S, T0, alpha, epochs, N_per_epochs, delta, output_dir,  
+        S, T0, alpha, epochs, N_per_epochs, delta, output_dir,
         cooling_func='simp', ext='', **kwargs
     ):
         '''
@@ -899,6 +901,6 @@ if __name__ == '__main__':
     optim_solution.plot_cost_hist(save=SAVE)
     Coordinate.plot_solution(
         initial_coords, initial_solution, loc_bar, optim_solution.xf,
-        optim_solution.final_loc_bar, S, ext=ext, save=SAVE, 
+        optim_solution.final_loc_bar, S, ext=ext, save=SAVE,
         output_dir=output_dir
     )

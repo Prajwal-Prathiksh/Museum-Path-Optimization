@@ -20,11 +20,13 @@ OUTPUT_DIR = os.path.join(
 )
 CFUNCS = ['simp', 'exp']
 
+
 def make_output_dir(folder_name, OUTPUT_DIR=OUTPUT_DIR):
     output_dir = os.path.join(OUTPUT_DIR, folder_name)
     if os.path.exists(output_dir) is False:
         os.mkdir(output_dir)
     return output_dir
+
 
 def cli_parser():
     parser = argparse.ArgumentParser(
