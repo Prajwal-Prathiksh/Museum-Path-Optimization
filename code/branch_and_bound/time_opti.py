@@ -121,17 +121,19 @@ class Node():
 
 
 def CreateNode(parent_matrix, tour, level, i, j):
-    """Function to allocate a new node `(i, j)` corresponds to visiting city `j` from city `i`
+    """
+        Function to allocate a new node `(i, j)` corresponds to visiting city
+        `j` from city `i`
 
-    Args:
-        parent_matrix (N*N matrix): penalty matrix
-        tour (list of [i,j]): edges visited till the node
-        level (int): the total number of cities visited so far
-        i (int): come from node Id
-        j (int): goto node Id
+        Args:
+            parent_matrix (N*N matrix): penalty matrix
+            tour (list of [i,j]): edges visited till the node
+            level (int): the total number of cities visited so far
+            i (int): come from node Id
+            j (int): goto node Id
 
-    Returns:
-        Node
+        Returns:
+            Node
     """
     node = Node(tour, [], 0, 0, 0)
     if level != 0:  # skip for the root node
@@ -238,7 +240,9 @@ def solve(cost_matrix):
             if minimum.reduced_matrix[i][j] != INF:
                 # create a child node and calculate its cost
                 branch_node = CreateNode(
-                    minimum.reduced_matrix, minimum.tour, minimum.level + 1, i, j)
+                    minimum.reduced_matrix, minimum.tour,
+                    minimum.level + 1, i, j
+                )
 
                 # calculate the cost
                 matrix_reduction(branch_node)
@@ -246,8 +250,11 @@ def solve(cost_matrix):
                 branch_node.cost += minimum.cost + minimum.reduced_matrix[i][j]
 
                 # # For debugging
-                # print("Branch node cost: ", branch_node.cost, "minimum.cost", minimum.cost,
-                #       "minimum.reduced_matrix[i][j]", minimum.reduced_matrix[i][j])
+                # print(
+                # "Branch node cost: ", branch_node.cost, "minimum.cost",
+                # minimum.cost, "minimum.reduced_matrix[i][j]",
+                # minimum.reduced_matrix[i][j]
+                # )
 
                 # added the child to list of live nodes
                 live_nodes.put((branch_node.cost, branch_node))

@@ -74,6 +74,7 @@ $ python code/simulated_annealing/complex_simulated_annealing.py -h
 │   ├───cost_matrices
 │   └───Symmetric_TSPLIB
 ├───output
+│   ├───branch_and_bound
 │   └───simulated_annealing
 └───reports
 ```
