@@ -21,14 +21,14 @@ This repository represents the work done as part of the course project for AE - 
 Instructions on running specific algorithms are mentioned below:
 
 ### Data Input
-To generate and store the cost matrices of all the test cases, do the following:
+To generate and store the cost matrices of all the test cases, do the following from root:
 ```
 $ python code/data_input/base_input.py
 ```
 
 ### Simple Simulated Annealing
 
-To run the simple simulated annealing algorithm, do the following:
+To run the simple simulated annealing algorithm, do the following from root:
 ```
 $ python code/simulated_annealing/simple_simulated_annealing.py
 ```
@@ -40,7 +40,7 @@ $ python code/simulated_annealing/simple_simulated_annealing.py -h
 
 ### Complex Simulated Annealing
 
-To run the complex simulated annealing algorithm, do the following:
+To run the complex simulated annealing algorithm, do the following from root:
 ```
 $ python code/simulated_annealing/complex_simulated_annealing.py
 ```
@@ -57,15 +57,12 @@ $ python code/simulated_annealing/complex_simulated_annealing.py -h
 │   ├───ant_colony
 │   ├───branch_and_bound
 │   ├───data_input
-│   │   └───__pycache__
 │   ├───genetic
-│   ├───simulated_annealing
-│   └───__pycache__
+│   └───simulated_annealing
 ├───data
 │   ├───cost_matrices
 │   └───Symmetric_TSPLIB
 ├───output
 │   └───simulated_annealing
-│       └───figures
 └───reports
 ```

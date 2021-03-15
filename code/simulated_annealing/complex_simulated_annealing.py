@@ -22,6 +22,13 @@ OUTPUT_DIR = os.path.join(
 CFUNCS = ['simp', 'exp']
 
 
+def make_output_dir(folder_name, OUTPUT_DIR=OUTPUT_DIR):
+    output_dir = os.path.join(OUTPUT_DIR, folder_name)
+    if os.path.exists(output_dir) is False:
+        os.mkdir(output_dir)
+    return output_dir
+
+
 def cli_parser():
     parser = argparse.ArgumentParser(
         allow_abbrev=False,
@@ -73,6 +80,10 @@ def cli_parser():
     parser.add_argument(
         '--tcn', action='store', dest='tc_number', type=int,
         default=0, help='Test case number'
+    )
+    parser.add_argument(
+        '-d', action='store', dest='output_dir', type=str,
+        default='CSA', help='Output folder name'
     )
 
     args = parser.parse_args()
@@ -150,7 +161,7 @@ class Coordinate:
             Parameters:
             -----------
             coords: (List)
-                List of Coordinate classes
+                List of Coordinate instances
 
             Returns:
             --------
@@ -182,7 +193,7 @@ class Coordinate:
             Returns:
             --------
             coords: (List)
-                List of Coordinate classes
+                List of Coordinate instances
         '''
         if seed is None:
             np.random.seed()
@@ -269,7 +280,7 @@ class Coordinate:
     @staticmethod
     def plot_solution(
         initial_coords, initial_solution, loc_bar, final_solution,
-        final_loc_bar, S, ext='', save=False
+        final_loc_bar, S, output_dir, ext='', save=False,
     ):
         '''
             Plots the inital and the optimized solution in a convinient format.
@@ -277,7 +288,7 @@ class Coordinate:
             Parameters:
             -----------
             initial_coords: (List)
-                Inital list of Coordinate classes
+                Inital list of Coordinate instances
             initial_solution: (List)
                 List of Indices
             loc_bar: (int)
@@ -286,6 +297,8 @@ class Coordinate:
                 List of final indices
             final_loc_bar: (int)
                 Final location of bar, number of exhibits visited
+            output_dir: (string)
+                Absolute path of the output directory
             ext: (string), default=''
                 Add a prefix to the plot before saving it
             save = (Boolean), default=True
@@ -337,11 +350,10 @@ class Coordinate:
 
         if save:
             fname = os.path.join(
-                OUTPUT_DIR, f'{ext}CSA_optimized_solution.png'
+                output_dir, f'{ext}CSA_optimized_solution.png'
             )
             plt.savefig(fname, dpi=400, bbox_inches='tight')
             print(f'\nPlot saved at: {fname}')
-        plt.show()
 
 
 class ComplexSimulatedAnnealing:
@@ -352,36 +364,46 @@ class ComplexSimulatedAnnealing:
 
         Parameters:
         -----------
-            func0: (Function)
-                Cost function to be evaluated
-            check_constraints: (Function)
-                Checks that the function obeys the constraints
-            x0: (Array):
-                Initial solution
-            loc_bar: (int):
-                Location of bar separating visited and unvisited exhibit
-            velocity: (float):
-                Velocity of the tourist (in m/s)
-            T_max: (int)
-                Maximum time the tourist can spend in the museum (in s)
-            S: (Array):
-                Satisfaction from visiting each exhibit
-            T0: (float)
-                Inital temperature
-            alpha: (float)
-                Cooling factor
-            epochs: (int)
-                Number of epochs
-            N_per_epochs: (int)
-                Number of iterations per epoch
-            delta: (int)
-                Number of iterations after which solution is shaken
+        func0: (Function)
+            Cost function to be evaluated
+        check_constraints: (Function)
+            Checks that the function obeys the constraints
+        coords: (List)
+            List of Coordinate instances
+        x0: (Array):
+            Initial solution
+        loc_bar: (int):
+            Location of bar separating visited and unvisited exhibit
+        velocity: (float):
+            Velocity of the tourist (in m/s)
+        T_max: (int)
+            Maximum time the tourist can spend in the museum (in s)
+        S: (Array):
+            Satisfaction from visiting each exhibit
+        T0: (float)
+            Inital temperature
+        alpha: (float)
+            Cooling factor
+        epochs: (int)
+            Number of epochs
+        N_per_epochs: (int)
+            Number of iterations per epoch
+        delta: (int)
+            Number of iterations after which solution is shaken
+        output_dir: (string)
+            Absolute path of the output directory
+        cooling_func: (string), default=simple
+            Type of cooling function to be used
+            Choose from: ['simp', 'exp']
+        ext: (string), default=''
+            Add a prefix to the plots, summary_data and summary_log before
+            saving it
     '''
 
     def __init__(
         self, func0, check_constraints, coords, x0, loc_bar, velocity, T_max,
-        S, T0, alpha, epochs, N_per_epochs, delta, cooling_func='simp', ext='',
-        **kwargs
+        S, T0, alpha, epochs, N_per_epochs, delta, output_dir,
+        cooling_func='simp', ext='', **kwargs
     ):
         '''
             Parameters:
@@ -390,6 +412,8 @@ class ComplexSimulatedAnnealing:
                 Cost function to be evaluated
             check_constraints: (Function)
                 Checks that the function obeys the constraints
+            coords: (List)
+                List of Coordinate instances
             x0: (Array):
                 Initial solution
             loc_bar: (int):
@@ -410,8 +434,16 @@ class ComplexSimulatedAnnealing:
                 Number of iterations per epoch
             delta: (int)
                 Number of iterations after which solution is shaken
-
+            output_dir: (string)
+                Absolute path of the output directory
+            cooling_func: (string), default=simple
+                Type of cooling function to be used
+                Choose from: ['simp', 'exp']
+            ext: (string), default=''
+                Add a prefix to the plots, summary_data and summary_log before
+                saving it
         '''
+        self.output_dir = output_dir
         # Initialize
         self.func0 = func0
         self.check_constraints = check_constraints
@@ -517,14 +549,12 @@ class ComplexSimulatedAnnealing:
 
         if save:
             fname = os.path.join(
-                OUTPUT_DIR, 'figures', f'{ext}CSA_cost_hist.png'
+                self.output_dir, f'{ext}CSA_cost_hist.png'
             )
             plt.savefig(
                 fname, dpi=400, bbox_inches='tight'
             )
             print(f'\nPlot saved at: {fname}')
-
-        plt.show()
 
     @staticmethod
     def apply_swap(x, loc_bar):
@@ -718,7 +748,9 @@ class ComplexSimulatedAnnealing:
         '''
         ext = self.ext
         try:
-            logname = os.path.join(OUTPUT_DIR, f'{ext}CSA_solver_summary.log')
+            logname = os.path.join(
+                self.output_dir, 'CSA_solver_summary.log'
+            )
             if os.path.exists(logname):
                 os.remove(logname)
 
@@ -772,7 +804,7 @@ class ComplexSimulatedAnnealing:
             print(f'Log file saved at: {logname}')
 
             if save:
-                fname = os.path.join(OUTPUT_DIR, f'{ext}SSA_results.npz')
+                fname = os.path.join(self.output_dir, f'SSA_results.npz')
                 np.savez(
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
                     permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
@@ -819,6 +851,9 @@ if __name__ == '__main__':
     # Parse CLI arguments
     args = cli_parser()
 
+    # Make output directory
+    output_dir = make_output_dir(args.output_dir)
+
     # Generate random coordinates, initial solution that satifies constraints
     velocity, T_max, delta = args.vel, args.T_max, args.delta
 
@@ -859,11 +894,13 @@ if __name__ == '__main__':
         epochs=epochs,
         N_per_epochs=N_per_epochs,
         delta=delta,
-        ext=ext
+        ext=ext,
+        output_dir=output_dir
     )
     optim_solution.solver_summary(save=SAVE)
     optim_solution.plot_cost_hist(save=SAVE)
     Coordinate.plot_solution(
         initial_coords, initial_solution, loc_bar, optim_solution.xf,
-        optim_solution.final_loc_bar, S, ext=ext, save=SAVE
+        optim_solution.final_loc_bar, S, ext=ext, save=SAVE,
+        output_dir=output_dir
     )
