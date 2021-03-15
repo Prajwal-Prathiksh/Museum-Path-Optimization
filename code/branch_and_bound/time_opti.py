@@ -1,9 +1,92 @@
+###########################################################################
+# Imports
+###########################################################################
+# Standard library imports
+import os
+import sys
 import copy
+import time
+import datetime
+import argparse
 import numpy as np
 from queue import PriorityQueue
 
+sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
+
+###########################################################################
+# Code
+###########################################################################
+OUTPUT_DIR = os.path.join(
+    os.getcwd(), 'output', 'branch_and_bound'
+)
+
 INF = np.infty
 N = 5  # Number of exhibits
+
+
+def cmd_line_parser():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        '-s', '--save', dest='SAVE', type=bool, default=False,
+        help='If true, stores any generated plots and the summary data'
+    )
+
+    parser.add_argument(
+        '--ext', dest='ext', type=str, default='',
+        help='Add a prefix to the plots, summary_data and summary_log '
+        'before saving it'
+    )
+
+    parser.add_argument(
+        '--tcn', dest='tc_number', type=int,
+        default=0, help='Test case number'
+    )
+
+    parser.add_argument(
+        '-d', '--dest', dest='output_dir', type=str,
+        default='BnB', help='Output folder name'
+    )
+
+    args = parser.parse_args()
+    return args
+
+
+def make_output_dir(folder_name, OUTPUT_DIR=OUTPUT_DIR):
+    output_dir = os.path.join(OUTPUT_DIR, folder_name)
+    if os.path.exists(output_dir) is False:
+        os.mkdir(output_dir)
+    return output_dir
+
+
+def function_call_counter(func):
+    '''
+        Count number of times a function was called. To be used as decorator.
+    '''
+    def wrapper(*args, **kwargs):
+        wrapper.calls += 1
+        return func(*args, **kwargs)
+
+    wrapper.calls = 0
+    return wrapper
+
+
+def function_timer(func):
+    """
+        Calculates the time required for function execution.
+    """
+    def wrapper(*args, **kwargs):
+        begin = time.time()
+        f = func(*args, **kwargs)
+        end = time.time()
+        wrapper.time_taken = end - begin
+        print("Total time taken in : ", func.__name__, wrapper.time_taken)
+        return f
+
+    wrapper.time_taken = 0
+    return wrapper
 
 
 class Node():
@@ -74,6 +157,7 @@ def CreateNode(parent_matrix, tour, level, i, j):
     return node
 
 
+@function_call_counter
 def matrix_reduction(node):
     # reduce each row so that there must be at least one zero in each row
     # node.reduced_matrix
@@ -119,17 +203,7 @@ def matrix_reduction(node):
     node.cost = cost
 
 
-# to be editted
-def print_tour(node):
-    if node.level == N - 1:
-        print()
-        print("The optimal tour is:")
-        for i in range(N):
-            print(node.tour[i][0], "-->", node.tour[i][1])
-    else:
-        print(node.tour)
-
-
+@function_timer
 def solve(cost_matrix):
     # Create a priority queue to store live nodes of the search tree
     live_nodes = PriorityQueue()
@@ -154,8 +228,7 @@ def solve(cost_matrix):
         # if all cities are visited; termination of loop
         if minimum.level == N - 1:
             minimum.tour.append([i, 0])  # return to starting city
-            print_tour(minimum)
-            return minimum.cost  # optimal cost
+            return minimum  # final node
             break
 
         # do for each child of min
@@ -181,7 +254,90 @@ def solve(cost_matrix):
         del minimum
 
 
+def print_tour(node):
+    if node.level == N - 1:
+        print("\nThe optimal tour is:")
+        for i in range(N):
+            print(node.tour[i][0], "-->", node.tour[i][1])
+    else:
+        print(node.tour)
+
+
+def print_summary(output_dir, node, tc_name=None, ext=''):
+    '''
+        Prints the solver summary, and stores it in a `.log` file.
+
+        Parameters:
+        -----------
+        save = (Boolean), default=True
+            If True, saves the metadata in a log file
+    '''
+
+    try:
+        logname = os.path.join(output_dir, 'BnB_summary.log')
+        if os.path.exists(logname):
+            os.remove(logname)
+
+        outputFile = open(logname, 'a')
+
+        def printing(text):
+            print(text)
+            if outputFile:
+                outputFile.write(f'{text}\n')
+
+        time_taken, reduction_calls = solve.time_taken, matrix_reduction.calls
+        printing('\n===================================================')
+        printing('Solver Summary:')
+        printing('===================================================')
+        dt_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        pc_name = os.environ['COMPUTERNAME']
+        printing(f'\nRun on: {dt_string} | PC: {pc_name}')
+        if tc_name is not None:
+            printing(f'Test case name: {tc_name}')
+
+        printing(f'\nSolved in: {time_taken} s')
+        printing(f'Number of cost function calls: {reduction_calls}')
+
+        print("\nThe optimal tour is:")
+        for i in range(N):
+            print(node.tour[i][0], "-->", node.tour[i][1])
+
+        printing('\n===================================================\n')
+
+        print(f'Log file saved at: {logname}')
+
+        # if save:
+        #     fname = os.path.join(self.output_dir, f'{ext}BnB_results.npz')
+        #     np.savez(
+        #         fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
+        #         permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
+        #         reduction_in_cost=reduction_in_cost, T0=T0, alpha=alpha,
+        #         epochs=epochs, N_per_epochs=N_per_epochs,
+        #         cooling_func=cooling_func
+        #     )
+        #     print(f'\nSummary data saved at: {fname}')
+    finally:
+        outputFile.close()
+
+
 def main():
+    # Local import
+    from code.data_input.base_input import TestCaseLoader
+
+    # Read data off of standard library
+    loader = TestCaseLoader()
+
+    # Parse command line arguments
+    args = cmd_line_parser()
+    SAVE, ext = args.SAVE, args.ext
+
+    # Make output directory
+    output_dir = make_output_dir(args.output_dir)
+
+    tc_number = args.tc_number
+    tc_name, cost_matrix = loader.get_test_data(tc_number)
+
+    COST_MATRIX = cost_matrix
 
     # COST_MATRIX = [
     #     [INF, 10, 8, 9, 7],
@@ -199,18 +355,26 @@ def main():
     #     [8, 9, 2, 3, INF]
     # ]  # optimal cost is 16
 
-    COST_MATRIX = [
-        [INF, 2, 1, INF],
-        [2, INF, 4, 3],
-        [1, 4, INF, 2],
-        [INF, 3, 2, INF]
-    ]  # optimal cost is 8
+    # COST_MATRIX = [
+    #     [INF, 2, 1, INF],
+    #     [2, INF, 4, 3],
+    #     [1, 4, INF, 2],
+    #     [INF, 3, 2, INF]
+    # ]  # optimal cost is 8
 
     # `N` is the total number of total nodes on the graph or cities on the map
     global N
+    COST_MATRIX = np.array(COST_MATRIX)
     N = len(COST_MATRIX)
 
-    print("Total cost is {}".format(solve(COST_MATRIX)))
+    final_node = solve(COST_MATRIX)
+    optimal_cost = final_node.cost
+
+    print_tour(final_node)
+    print("Total cost is {}".format(optimal_cost))
+
+    if SAVE:
+        print_summary(output_dir, final_node, tc_name=tc_name, ext=ext)
 
 
 if __name__ == '__main__':
