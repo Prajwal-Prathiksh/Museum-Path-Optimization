@@ -28,10 +28,6 @@ def cli_parser():
     )
 
     parser.add_argument(
-        '--tcn', action='store', dest='tc_number', type=int,
-        default=0, help='Test case number'
-    )
-    parser.add_argument(
         '--T', action='store', dest='T', type=float,
         default=40, help='Inital temperature'
     )
@@ -48,7 +44,7 @@ def cli_parser():
         default=100, help='Number of iterations per epoch'
     )
     parser.add_argument(
-        '--s', action='store_true', dest='SAVE',
+        '-s', action='store_true', dest='SAVE',
         help='If true, stores any generated plots and the summary data'
     )
     parser.add_argument(
@@ -60,6 +56,10 @@ def cli_parser():
         default='',
         help='Add a prefix to the plots, summary_data and summary_log '
         'before saving it'
+    )
+    parser.add_argument(
+        '--tcn', action='store', dest='tc_number', type=int,
+        default=0, help='Test case number'
     )
 
     args = parser.parse_args()
@@ -303,8 +303,14 @@ class SimpleSimulatedAnnealing:
             Cooling factor
         epochs: (int)
             Number of epochs
-        N: (int)
+        N_per_epochs: (int)
             Number of iterations per epoch
+        cooling_func: (string), default=simple
+            Type of cooling function to be used
+            Choose from: ['simp', 'exp']
+        ext: (string), default=''
+            Add a prefix to the plots, summary_data and summary_log before
+            saving it
         **kwargs:
             Additional arguments for `func0`
     '''
@@ -507,7 +513,7 @@ class SimpleSimulatedAnnealing:
         '''
         ext = self.ext
         try:
-            logname = os.path.join(OUTPUT_DIR, f'{ext}solver_summary.log')
+            logname = os.path.join(OUTPUT_DIR, f'{ext}SSA_solver_summary.log')
             if os.path.exists(logname):
                 os.remove(logname)
 

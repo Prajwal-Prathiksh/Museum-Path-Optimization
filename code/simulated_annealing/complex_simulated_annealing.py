@@ -3,17 +3,21 @@
 ###########################################################################
 # Standard library imports
 import argparse
-import os
+from datetime import datetime
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import sys
+
+sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
 
 ###########################################################################
 # Code
 ###########################################################################
 OUTPUT_DIR = os.path.join(
-    os.getcwd(), 'output', 'figures', 'simulated_annealing'
+    os.getcwd(), 'output', 'simulated_annealing'
 )
 CFUNCS = ['simp', 'exp']
 
@@ -22,11 +26,19 @@ def cli_parser():
         allow_abbrev=False,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-
     parser.add_argument(
-        '--tcn', action='store', dest='tc_number', type=int,
-        default=0, help='Test case number'
+        '--vel', action='store', dest='vel', type=float,
+        default=1.0, help='Velocity of the tourist (in m/s)'
+    )    
+    parser.add_argument(
+        '--t-max', action='store', dest='T_max', type=float,
+        default=20, 
+        help='Maximum time the tourist can spend in the museum (in s)'
     )
+    parser.add_argument(
+        '--delta', action='store', dest='delta', type=int,
+        default=10, help='Number of iterations after which solution is shaken'
+    )  
     parser.add_argument(
         '--T', action='store', dest='T', type=float,
         default=40, help='Inital temperature'
@@ -44,7 +56,7 @@ def cli_parser():
         default=100, help='Number of iterations per epoch'
     )
     parser.add_argument(
-        '--s', action='store_true', dest='SAVE',
+        '-s', action='store_true', dest='SAVE',
         help='If true, stores any generated plots and the summary data'
     )
     parser.add_argument(
@@ -56,6 +68,10 @@ def cli_parser():
         default='',
         help='Add a prefix to the plots, summary_data and summary_log '
         'before saving it'
+    )
+    parser.add_argument(
+        '--tcn', action='store', dest='tc_number', type=int,
+        default=0, help='Test case number'
     )
 
     args = parser.parse_args()
@@ -121,6 +137,7 @@ class Coordinate:
         return dist
 
     @staticmethod
+    @function_calls
     def get_total_distance(coords):
         '''
             Calculates the total path distance in a list of instances of the
@@ -176,6 +193,7 @@ class Coordinate:
         return coords
 
     @staticmethod
+    @function_calls
     def satisfaction(x, S):
         '''
             Finds the satisfaction level of Tourist
@@ -196,7 +214,8 @@ class Coordinate:
         return satisfaction
 
     @staticmethod
-    def time(x, coords, velocity):
+    @function_calls
+    def time_taken(x, coords, velocity):
         '''
             Time to complete tour
 
@@ -223,6 +242,7 @@ class Coordinate:
         return (dist / velocity)
 
     @staticmethod
+    @function_calls
     def constraints(x, coords, velocity, T_max):
         '''
             Checks the constraints
@@ -241,12 +261,12 @@ class Coordinate:
             --------
             Boolean value of whether constraints are satisfied or not
         '''
-        return (Coordinate.time(x, coords, velocity) < T_max)
+        return (Coordinate.time_taken(x, coords, velocity) < T_max)
 
     @staticmethod
     def plot_solution(
         initial_coords, initial_solution, loc_bar, final_solution, 
-        final_loc_bar, S
+        final_loc_bar, S, ext='', save=False
     ):
         '''
             Plots the inital and the optimized solution in a convinient format.
@@ -263,7 +283,10 @@ class Coordinate:
                 List of final indices
             final_loc_bar: (int)
                 Final location of bar, number of exhibits visited
-
+            ext: (string), default=''
+                Add a prefix to the plot before saving it
+            save = (Boolean), default=True
+                If True, saves the plot
 
             Returns:
             --------
@@ -309,12 +332,14 @@ class Coordinate:
         ax1.title.set_text(f'Initial Solution | Cost = {old_cost}')
         ax2.title.set_text(f'Optimized Solution | Cost = {new_cost}')
 
-        fname = os.path.join(OUTPUT_DIR, 'SA_optimized_solution.png')
-        plt.savefig(fname, dpi=400, bbox_inches='tight')
+        if save:
+            fname = os.path.join(OUTPUT_DIR, f'{ext}CSA_optimized_solution.png')
+            plt.savefig(fname, dpi=400, bbox_inches='tight')
+            print(f'\nPlot saved at: {fname}')
         plt.show()
 
 
-class SimulatedAnnealing:
+class ComplexSimulatedAnnealing:
     '''
         Simulated Annealing Class
         ---------------------------------
@@ -331,9 +356,9 @@ class SimulatedAnnealing:
             loc_bar: (int):
                 Location of bar separating visited and unvisited exhibit
             velocity: (float):
-                Velocity of tourist (m/sec)
+                Velocity of the tourist (in m/s)
             T_max: (int)
-                Maximum time the tourist has (secs)
+                Maximum time the tourist can spend in the museum (in s)
             S: (Array):
                 Satisfaction from visiting each exhibit
             T0: (float)
@@ -345,12 +370,13 @@ class SimulatedAnnealing:
             N_per_epochs: (int)
                 Number of iterations per epoch
             delta: (int)
-                Number after which solution is shaken
+                Number of iterations after which solution is shaken
     '''
 
     def __init__(
         self, func0, check_constraints, coords, x0, loc_bar, velocity,  T_max, 
-        S, T0, alpha, epochs, N_per_epochs, delta
+        S, T0, alpha, epochs, N_per_epochs, delta, cooling_func='simp', ext='', 
+        **kwargs
     ):
         '''
             Parameters:
@@ -364,9 +390,9 @@ class SimulatedAnnealing:
             loc_bar: (int):
                 Location of bar separating visited and unvisited exhibit
             velocity: (float):
-                Velocity of tourist (m/sec)
+                Velocity of the tourist (in m/s)
             T_max: (int)
-                Maximum time the tourist has (secs)
+                Maximum time the tourist can spend in the museum (in s)
             S: (Array):
                 Satisfaction from visiting each exhibit
             T0: (float)
@@ -378,11 +404,15 @@ class SimulatedAnnealing:
             N_per_epochs: (int)
                 Number of iterations per epoch
             delta: (int)
-                Number after which solution is shaken
+                Number of iterations after which solution is shaken
 
         '''
+        # Initialize
         self.func0 = func0
+        self.cost0 = round(self.func0(x0[:loc_bar], S), 3)
+        self.func0_calls = 0  # Set number of function calls to zero
         self.check_constraints = check_constraints
+        self.check_constraints_calls = 0  # Set number of function calls to zero
         self.coords = coords
         self.S = S
         self.velocity = velocity
@@ -394,13 +424,29 @@ class SimulatedAnnealing:
         self.epochs = epochs
         self.N_per_epochs = N_per_epochs
         self.delta = delta
+        self.ext = ext
+
+        # Cooling function
+        self.cooling_funcs_dict = dict(
+            simp=self.simple_cooling_func, exp=self.exponential_cooling_func
+        )
+        self.cooling_func = self.cooling_funcs_dict[cooling_func]
+
         self.len_x0 = len(x0)
 
         # Run Algorithm
         self.xf, self.final_loc_bar, self.cost_hist, self.rt = \
             self.run_algorithm()
+        self.costf = round(self.cost_hist[-1], 3)
 
-    def cooling_func(self, T):
+        self.increase_in_cost = round(
+            np.abs(1 - self.cost0 / self.costf) * 100, 3
+        )
+
+        self.func0_calls = self.func0.calls
+        self.check_constraints_calls = self.check_constraints.calls
+
+    def simple_cooling_func(self, T, epoch_num):
         '''
             A simple cooling function.
 
@@ -408,6 +454,8 @@ class SimulatedAnnealing:
             -----------
             T: (float)
                 Current temperature
+            epoch_num: (int)
+                Current epoch number
 
             Returns:
             --------
@@ -417,27 +465,60 @@ class SimulatedAnnealing:
         T_cooled = T * self.alpha
         return T_cooled
 
-    def plot_cost_hist(self):
+    def exponential_cooling_func(self, T, epoch_num):
+        '''
+            A simple cooling function.
+
+            Parameters:
+            -----------
+            T: (float)
+                Current temperature
+            epoch_num: (int)
+                Current epoch number
+
+            Returns:
+            --------
+            T_cooled: (float)
+                Cooled temperature
+        '''
+        T_cooled = T * np.math.exp(-self.alpha * epoch_num)
+        return T_cooled
+
+    def plot_cost_hist(self, save=True):
         '''
             Plot the history of cost of the objective function per epoch.
+
+            Parameters:
+            -----------
+            save = (Boolean), default=True
+                If True, saves the plot
 
             Returns:
             --------
             Plot
         '''
+        ext = self.ext
         fig = plt.figure(figsize=(10, 5))
         ax1 = fig.add_subplot(111)
 
         x = np.arange(1, self.epochs + 1)
         ax1.plot(x, self.cost_hist)
 
-        ax1.title.set_text(f'Cost vs Epoch | Runtime: {round(self.rt,1)} s')
+        ax1.title.set_text(f'Cost vs Epoch | Runtime: {self.rt} s')
         ax1.set(xlabel=r'Epochs $\rightarrow$', ylabel='Cost')
 
-        fname = os.path.join(OUTPUT_DIR, 'SA_cost_hist.png')
-        plt.savefig(fname, dpi=400, bbox_inches='tight')
+        if save:
+            fname = os.path.join(
+                OUTPUT_DIR, 'figures', f'{ext}CSA_cost_hist.png'
+            )
+            plt.savefig(
+                fname, dpi=400, bbox_inches='tight'
+            )
+            print(f'\nPlot saved at: {fname}')
+
         plt.show()
 
+    @staticmethod
     def apply_swap(x, loc_bar):
         '''
             Swaps two elements of array which are being visited
@@ -462,6 +543,7 @@ class SimulatedAnnealing:
         x0[e2] = temp
         return x0
 
+    @staticmethod
     def apply_shake(x, loc_bar):
         '''
             Swaps two elements of array one being visited, one not being
@@ -489,6 +571,7 @@ class SimulatedAnnealing:
         x0[e2] = temp
         return x0
 
+    @staticmethod
     def modify_nodes(x, loc_bar):
         '''
             Increases or decreases the exhibits visited
@@ -537,6 +620,11 @@ class SimulatedAnnealing:
         T = self.T0
         cost = self.func0(x[:loc_bar], S)
 
+        apply_swap = ComplexSimulatedAnnealing.apply_swap
+        apply_shake = ComplexSimulatedAnnealing.apply_shake        
+        modify_nodes = ComplexSimulatedAnnealing.modify_nodes
+        time_taken = Coordinate.time_taken
+
         x_best = x
         cost_best = cost
         loc_bar_best = loc_bar
@@ -552,18 +640,20 @@ class SimulatedAnnealing:
             # Store history of cost
             cost_hist.append(cost)
 
-            tmp = self.check_constraints(x[:loc_bar], coords, velocity, T_max)
-            print(
-                f'Epoch: {epoch} | Cost = {round(cost, 3)} |  {loc_bar} | '
-                f'{tmp} | {Coordinate.time(x[:loc_bar],coords,velocity)} '
-                f'| {T_max}'
+            tmp_constr = self.check_constraints(
+                x[:loc_bar], coords, velocity, T_max
             )
+            tmp_time = round(time_taken(x[:loc_bar],coords,velocity), 1)
+            msg = f'Epoch: {epoch} | Cost = {round(cost, 1)} | ' +\
+                f'Exhibits visited = {loc_bar} | t = {tmp_time} | ' +\
+                f't_max = {T_max} | Constraints: {tmp_constr}'
+            print(msg, end='\r')
 
-            T = self.cooling_func(T)
+            T = self.cooling_func(T, epoch)
 
             for iterator in range(self.N_per_epochs):
-                loc_bar_new = SimulatedAnnealing.modify_nodes(x, loc_bar)
-                x_new = SimulatedAnnealing.apply_shake(x, loc_bar_new)
+                loc_bar_new = modify_nodes(x, loc_bar)
+                x_new = apply_shake(x, loc_bar_new)
                 cost_new = self.func0(x_new[:loc_bar_new], S)
 
                 if(
@@ -592,7 +682,7 @@ class SimulatedAnnealing:
                     j += 1
 
                 if(j >= self.delta):
-                    x_new = SimulatedAnnealing.apply_swap(x, loc_bar)
+                    x_new = apply_swap(x, loc_bar)
                     if(
                         self.check_constraints(
                             x_new[:loc_bar], coords, velocity, T_max
@@ -605,7 +695,113 @@ class SimulatedAnnealing:
         rt = toc - tic
 
         cost_hist = np.array(cost_hist)
-        return x, loc_bar, cost_hist, rt
+        return x, loc_bar, cost_hist, round(rt, 3)
+
+    def solver_summary(self, tc_name=None, save=True):
+        '''
+            Prints the solver summary, and stores it in a `.npz` file.
+
+            Parameters:
+            -----------
+            optim_solution: (Class - SimpleSimulatedAnnealing)
+                Instance of the `SimpleSimulatedAnnealing` class
+            save = (Boolean), default=True
+                If True, saves the metadata in a `.npz` file
+        '''
+        ext = self.ext
+        try:
+            logname = os.path.join(OUTPUT_DIR, f'{ext}CSA_solver_summary.log')
+            if os.path.exists(logname):
+                os.remove(logname)
+
+            outputFile = open(logname, 'a')
+
+            def printing(text):
+                print(text)
+                if outputFile:
+                    outputFile.write(f'{text}\n')
+
+            rt, func0_calls = self.rt, self.func0.calls
+            printing('\n===================================================')
+            printing('Solver Summary:')
+            printing('===================================================')
+            dt_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            pc_name = os.environ['COMPUTERNAME']
+            printing(f'\nRun on: {dt_string} | PC: {pc_name}')
+            if tc_name is not None:
+                printing(f'Test case name: {tc_name}')
+
+            printing(f'\nSolved in: {rt} s')
+            printing(f'Number of cost function calls: {func0_calls}')
+            c_calls = self.check_constraints_calls 
+            printing(f'Number of constraint function calls: {c_calls}')
+
+            x0_len = len(self.x0)
+            printing(f'\nTotal number of nodes: {x0_len}')
+            permut = ComplexSimulatedAnnealing.num_permutations_approx(x0_len)
+            printing(f'Total number of permutations: {permut}')
+
+            x0, xf = self.x0, self.xf
+            cost0, costf = self.cost0, self.costf
+            printing(
+                f'\nInitial Cost: {cost0} ---> Optimized Cost: {costf}'
+            )
+            increase_in_cost = self.increase_in_cost
+            printing(f'Increase in cost (in %): {increase_in_cost} %')
+
+            T0, alpha, delta = self.T0, self.alpha, self.delta
+            epochs = self.epochs
+            N_per_epochs = self.N_per_epochs
+            vel, T_max = self.velocity, self.T_max
+            cooling_func = self.cooling_func.__name__
+            printing(f'\nT0 = {T0} | alpha = {alpha} | delta = {delta}')
+            printing(f'epochs = {epochs} | iter/epoch = {N_per_epochs}')
+            printing(f'Velocity = {vel} | T_max = {T_max}')
+            printing(f'Cooling Function: {cooling_func}()')
+
+            printing('\n===================================================\n')
+
+            print(f'Log file saved at: {logname}')
+
+            if save:
+                fname = os.path.join(OUTPUT_DIR, f'{ext}SSA_results.npz')
+                np.savez(
+                    fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
+                    permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
+                    increase_in_cost=increase_in_cost, T0=T0, alpha=alpha, 
+                    delta=delta, epochs=epochs, N_per_epochs=N_per_epochs,
+                    cooling_func=cooling_func, vel=vel, T_max=T_max
+                )
+                print(f'\nSummary data saved at: {fname}')
+        finally:
+            outputFile.close()
+
+    @staticmethod
+    def num_permutations_approx(N):
+        '''
+            Find the approximate of the total number of permutations for the 
+            tourist problem.
+
+            Parameters:
+            -----------
+            N: (int)
+                Number for which the approximate factorial needs to be
+                calculated
+
+            Returns:
+            --------
+            res: (string)
+                Approximate factorial
+        '''
+        tmp = list(range(1, N + 1))
+        for i in range(N):
+            tmp[i] = np.math.factorial(tmp[i])
+        P = sum(tmp)
+        res = int(np.floor(np.math.log10(P)))
+        P = str(P)
+        res = f'{P[0]}.{P[1]}{P[2]}e{res}'
+
+        return res
 
 
 ###########################################################################
@@ -616,9 +812,10 @@ if __name__ == '__main__':
     args = cli_parser()
 
     # Generate random coordinates, initial solution that satifies constraints
+    velocity, T_max, delta = args.vel, args.T_max, args.delta
+
     initial_coords = Coordinate.random_coordinates_list(50, seed=0)
-    velocity = 1
-    T_max = 20
+
     S = []
     initial_solution = []
     for i in range(len(initial_coords)):
@@ -640,14 +837,15 @@ if __name__ == '__main__':
     cfunc = args.cfunc
 
     # Set up Simulated Annealing Class
-    optim_solution = SimulatedAnnealing( 
+    optim_solution = ComplexSimulatedAnnealing( 
         func0=Coordinate.satisfaction, check_constraints=Coordinate.constraints,
         coords=initial_coords, x0=initial_solution, loc_bar=loc_bar, 
         velocity=velocity, T_max=T_max, S=S, T0=T0, alpha=alpha, epochs=epochs,
-        N_per_epochs=N_per_epochs, delta=10
+        N_per_epochs=N_per_epochs, delta=delta, ext=ext
     )
-    optim_solution.plot_cost_hist()
+    optim_solution.solver_summary(save=SAVE)
+    optim_solution.plot_cost_hist(save=SAVE)
     Coordinate.plot_solution( 
         initial_coords, initial_solution, loc_bar, optim_solution.xf,
-        optim_solution.final_loc_bar, S
+        optim_solution.final_loc_bar, S, ext=ext, save=SAVE
     )
