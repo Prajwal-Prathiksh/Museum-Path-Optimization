@@ -639,6 +639,7 @@ if __name__ == '__main__':
     tc_number = args.tc_number
     tc_name, cost_matrix = loader.get_test_data(tc_number)
     num_nodes = np.shape(cost_matrix)[0]
+    print(f'Num of Nodes: {num_nodes}')
     np.random.seed(0)
     initial_soln = np.random.permutation(np.arange(num_nodes))
 

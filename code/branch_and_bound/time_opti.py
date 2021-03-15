@@ -116,8 +116,8 @@ class Node():
             return False
 
     def debug(self):
-        print("Tour: {} has a cost {} for node {} at level {}".format(
-            self.tour, self.cost, self.Id, self.level))
+        print("Tour: {} | Cost = {} | Node = {} | Level = {} |".format(
+            self.tour, self.cost, self.Id, self.level), end='\r')
 
 
 def CreateNode(parent_matrix, tour, level, i, j):

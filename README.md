@@ -28,9 +28,13 @@ $ python code/data_input/base_input.py
 ```
 
 ### Branch and Bound
-To run the branch and bound algorithm, do the following:
+To run the branch and bound algorithm, do the following from root:
 ```
-$ python code/branch_and_bound/algorithm.py
+$ python code/branch_and_bound/time_opti.py
+```
+Run the following to get all the command-line arguments:
+```
+$ python code/branch_and_bound/time_opti.py -h
 ```
 
 ### Simple Simulated Annealing
