@@ -20,6 +20,11 @@ OUTPUT_DIR = os.path.join(
 )
 CFUNCS = ['simp', 'exp']
 
+def make_output_dir(folder_name, OUTPUT_DIR=OUTPUT_DIR):
+    output_dir = os.path.join(OUTPUT_DIR, folder_name)
+    if os.path.exists(output_dir) is False:
+        os.mkdir(output_dir)
+    return output_dir
 
 def cli_parser():
     parser = argparse.ArgumentParser(
@@ -60,6 +65,10 @@ def cli_parser():
     parser.add_argument(
         '--tcn', action='store', dest='tc_number', type=int,
         default=0, help='Test case number'
+    )
+    parser.add_argument(
+        '-d', action='store', dest='output_dir', type=str,
+        default='SSA', help='Output folder name'
     )
 
     args = parser.parse_args()
@@ -187,7 +196,7 @@ class Coordinate:
             Parameters:
             -----------
             coords: (List)
-                List of Coordinate classes
+                List of Coordinate instances
 
             Returns:
             --------
@@ -219,7 +228,7 @@ class Coordinate:
             Returns:
             --------
             coords: (List)
-                List of Coordinate classes
+                List of Coordinate instances
         '''
         if seed is None:
             np.random.seed()
@@ -233,16 +242,18 @@ class Coordinate:
         return coords
 
     @staticmethod
-    def plot_solution(initial_coords, optim_coords, save=True):
+    def plot_solution(initial_coords, optim_coords, output_dir, save=True):
         '''
             Plots the inital and the optimized solution in a convinient format.
 
             Parameters:
             -----------
             initial_coords: (List)
-                Inital list of Coordinate classes
+                Inital List of Coordinate instances
             optim_coords: (List)
-                Optimized list of Coordinate classes
+                Optimized List of Coordinate instances
+            output_dir: (string)
+                Absolute path of the output directory
             save = (Boolean), default=True
                 If True, saves the plot
 
@@ -279,10 +290,8 @@ class Coordinate:
         ax2.title.set_text(f'Optimized Solution | Cost = {new_cost}')
 
         if save:
-            fname = os.path.join(OUTPUT_DIR, 'SSA_optimized_solution.png')
+            fname = os.path.join(output_dir, 'SSA_optimized_solution.png')
             plt.savefig(fname, dpi=400, bbox_inches='tight')
-
-        plt.show()
 
 
 class SimpleSimulatedAnnealing:
@@ -305,6 +314,8 @@ class SimpleSimulatedAnnealing:
             Number of epochs
         N_per_epochs: (int)
             Number of iterations per epoch
+        output_dir: (string)
+            Absolute path of the output directory
         cooling_func: (string), default=simple
             Type of cooling function to be used
             Choose from: ['simp', 'exp']
@@ -316,7 +327,7 @@ class SimpleSimulatedAnnealing:
     '''
 
     def __init__(
-        self, func0, x0, T0, alpha, epochs, N_per_epochs,
+        self, func0, x0, T0, alpha, epochs, N_per_epochs, output_dir,
         cooling_func='simp', ext='', **kwargs
     ):
         '''
@@ -334,6 +345,8 @@ class SimpleSimulatedAnnealing:
                 Number of epochs
             N_per_epochs: (int)
                 Number of iterations per epoch
+            output_dir: (string)
+                Absolute path of the output directory
             cooling_func: (string), default=simple
                 Type of cooling function to be used
                 Choose from: ['simp', 'exp']
@@ -343,6 +356,7 @@ class SimpleSimulatedAnnealing:
             **kwargs:
                 Additional arguments for `func0`
         '''
+        self.output_dir = output_dir
         # Initialize
         self.func0 = func0
         self.cost0 = round(self.func0(x0, **kwargs), 3)
@@ -435,14 +449,12 @@ class SimpleSimulatedAnnealing:
 
         if save:
             fname = os.path.join(
-                OUTPUT_DIR, 'figures', f'{ext}SSA_cost_hist.png'
+                self.output_dir, f'{ext}SSA_cost_hist.png'
             )
             plt.savefig(
                 fname, dpi=400, bbox_inches='tight'
             )
             print(f'\nPlot saved at: {fname}')
-
-        plt.show()
 
     def run_algorithm(self, **kwargs):
         '''
@@ -513,7 +525,7 @@ class SimpleSimulatedAnnealing:
         '''
         ext = self.ext
         try:
-            logname = os.path.join(OUTPUT_DIR, f'{ext}SSA_solver_summary.log')
+            logname = os.path.join(self.output_dir, 'SSA_solver_summary.log')
             if os.path.exists(logname):
                 os.remove(logname)
 
@@ -563,7 +575,7 @@ class SimpleSimulatedAnnealing:
             print(f'Log file saved at: {logname}')
 
             if save:
-                fname = os.path.join(OUTPUT_DIR, f'{ext}SSA_results.npz')
+                fname = os.path.join(self.output_dir, f'{ext}SSA_results.npz')
                 np.savez(
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
                     permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
@@ -612,6 +624,9 @@ if __name__ == '__main__':
     # Parse CLI arguments
     args = cli_parser()
 
+    # Make output directory
+    output_dir = make_output_dir(args.output_dir)
+
     # Set-up parameters for the Simulated Annealing Algorithm
     T0, alpha = args.T, args.alpha
     epochs, N_per_epochs = args.epochs, args.N_per_epochs
@@ -629,7 +644,7 @@ if __name__ == '__main__':
     optim_solution = SimpleSimulatedAnnealing(
         func0=get_total_cost, x0=initial_soln, T0=T0, alpha=alpha,
         epochs=epochs, N_per_epochs=N_per_epochs, cost_matrix=cost_matrix,
-        cooling_func=cfunc, ext=ext
+        cooling_func=cfunc, ext=ext, output_dir=output_dir
     )
 
     optim_solution.solver_summary(tc_name=tc_name, save=SAVE)
