@@ -4,6 +4,7 @@
   - [Group Members](#group-members)
   - [Description](#description)
     - [Data Input](#data-input)
+    - [Branch and Bound](#branch-and-bound)
     - [Simple Simulated Annealing](#simple-simulated-annealing)
     - [Complex Simulated Annealing](#complex-simulated-annealing)
   - [Project Tree](#project-tree)
@@ -24,6 +25,16 @@ Instructions on running specific algorithms are mentioned below:
 To generate and store the cost matrices of all the test cases, do the following from root:
 ```
 $ python code/data_input/base_input.py
+```
+
+### Branch and Bound
+To run the branch and bound algorithm, do the following from root:
+```
+$ python code/branch_and_bound/time_opti.py
+```
+Run the following to get all the command-line arguments:
+```
+$ python code/branch_and_bound/time_opti.py -h
 ```
 
 ### Simple Simulated Annealing
@@ -63,6 +74,7 @@ $ python code/simulated_annealing/complex_simulated_annealing.py -h
 │   ├───cost_matrices
 │   └───Symmetric_TSPLIB
 ├───output
+│   ├───branch_and_bound
 │   └───simulated_annealing
 └───reports
 ```
