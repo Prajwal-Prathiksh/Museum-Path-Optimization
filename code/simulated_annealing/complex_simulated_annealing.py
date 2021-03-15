@@ -21,6 +21,7 @@ OUTPUT_DIR = os.path.join(
 )
 CFUNCS = ['simp', 'exp']
 
+
 def cli_parser():
     parser = argparse.ArgumentParser(
         allow_abbrev=False,
@@ -29,16 +30,16 @@ def cli_parser():
     parser.add_argument(
         '--vel', action='store', dest='vel', type=float,
         default=1.0, help='Velocity of the tourist (in m/s)'
-    )    
+    )
     parser.add_argument(
         '--t-max', action='store', dest='T_max', type=float,
-        default=20, 
+        default=20,
         help='Maximum time the tourist can spend in the museum (in s)'
     )
     parser.add_argument(
         '--delta', action='store', dest='delta', type=int,
         default=10, help='Number of iterations after which solution is shaken'
-    )  
+    )
     parser.add_argument(
         '--T', action='store', dest='T', type=float,
         default=40, help='Inital temperature'
@@ -77,6 +78,7 @@ def cli_parser():
     args = parser.parse_args()
     return args
 
+
 def function_calls(f):
     '''
         Count number of times a function was called. To be used as decorator.
@@ -86,6 +88,7 @@ def function_calls(f):
         return f(*args, **kwargs)
     wrapped.calls = 0
     return wrapped
+
 
 class Coordinate:
     '''
@@ -265,7 +268,7 @@ class Coordinate:
 
     @staticmethod
     def plot_solution(
-        initial_coords, initial_solution, loc_bar, final_solution, 
+        initial_coords, initial_solution, loc_bar, final_solution,
         final_loc_bar, S, ext='', save=False
     ):
         '''
@@ -333,7 +336,9 @@ class Coordinate:
         ax2.title.set_text(f'Optimized Solution | Cost = {new_cost}')
 
         if save:
-            fname = os.path.join(OUTPUT_DIR, f'{ext}CSA_optimized_solution.png')
+            fname = os.path.join(
+                OUTPUT_DIR, f'{ext}CSA_optimized_solution.png'
+            )
             plt.savefig(fname, dpi=400, bbox_inches='tight')
             print(f'\nPlot saved at: {fname}')
         plt.show()
@@ -374,8 +379,8 @@ class ComplexSimulatedAnnealing:
     '''
 
     def __init__(
-        self, func0, check_constraints, coords, x0, loc_bar, velocity,  T_max, 
-        S, T0, alpha, epochs, N_per_epochs, delta, cooling_func='simp', ext='', 
+        self, func0, check_constraints, coords, x0, loc_bar, velocity, T_max,
+        S, T0, alpha, epochs, N_per_epochs, delta, cooling_func='simp', ext='',
         **kwargs
     ):
         '''
@@ -409,10 +414,13 @@ class ComplexSimulatedAnnealing:
         '''
         # Initialize
         self.func0 = func0
-        self.cost0 = round(self.func0(x0[:loc_bar], S), 3)
-        self.func0_calls = 0  # Set number of function calls to zero
         self.check_constraints = check_constraints
-        self.check_constraints_calls = 0  # Set number of function calls to zero
+        self.cost0 = round(self.func0(x0[:loc_bar], S), 3)
+
+        # Set number of function calls to zero
+        self.func0_calls = 0
+        self.check_constraints_calls = 0
+
         self.coords = coords
         self.S = S
         self.velocity = velocity
@@ -621,7 +629,7 @@ class ComplexSimulatedAnnealing:
         cost = self.func0(x[:loc_bar], S)
 
         apply_swap = ComplexSimulatedAnnealing.apply_swap
-        apply_shake = ComplexSimulatedAnnealing.apply_shake        
+        apply_shake = ComplexSimulatedAnnealing.apply_shake
         modify_nodes = ComplexSimulatedAnnealing.modify_nodes
         time_taken = Coordinate.time_taken
 
@@ -643,7 +651,7 @@ class ComplexSimulatedAnnealing:
             tmp_constr = self.check_constraints(
                 x[:loc_bar], coords, velocity, T_max
             )
-            tmp_time = round(time_taken(x[:loc_bar],coords,velocity), 1)
+            tmp_time = round(time_taken(x[:loc_bar], coords, velocity), 1)
             msg = f'Epoch: {epoch} | Cost = {round(cost, 1)} | ' +\
                 f'Exhibits visited = {loc_bar} | t = {tmp_time} | ' +\
                 f't_max = {T_max} | Constraints: {tmp_constr}'
@@ -733,7 +741,7 @@ class ComplexSimulatedAnnealing:
 
             printing(f'\nSolved in: {rt} s')
             printing(f'Number of cost function calls: {func0_calls}')
-            c_calls = self.check_constraints_calls 
+            c_calls = self.check_constraints_calls
             printing(f'Number of constraint function calls: {c_calls}')
 
             x0_len = len(self.x0)
@@ -768,7 +776,7 @@ class ComplexSimulatedAnnealing:
                 np.savez(
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
                     permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
-                    increase_in_cost=increase_in_cost, T0=T0, alpha=alpha, 
+                    increase_in_cost=increase_in_cost, T0=T0, alpha=alpha,
                     delta=delta, epochs=epochs, N_per_epochs=N_per_epochs,
                     cooling_func=cooling_func, vel=vel, T_max=T_max
                 )
@@ -779,7 +787,7 @@ class ComplexSimulatedAnnealing:
     @staticmethod
     def num_permutations_approx(N):
         '''
-            Find the approximate of the total number of permutations for the 
+            Find the approximate of the total number of permutations for the
             tourist problem.
 
             Parameters:
@@ -837,15 +845,25 @@ if __name__ == '__main__':
     cfunc = args.cfunc
 
     # Set up Simulated Annealing Class
-    optim_solution = ComplexSimulatedAnnealing( 
-        func0=Coordinate.satisfaction, check_constraints=Coordinate.constraints,
-        coords=initial_coords, x0=initial_solution, loc_bar=loc_bar, 
-        velocity=velocity, T_max=T_max, S=S, T0=T0, alpha=alpha, epochs=epochs,
-        N_per_epochs=N_per_epochs, delta=delta, ext=ext
+    optim_solution = ComplexSimulatedAnnealing(
+        func0=Coordinate.satisfaction,
+        check_constraints=Coordinate.constraints,
+        coords=initial_coords,
+        x0=initial_solution,
+        loc_bar=loc_bar,
+        velocity=velocity,
+        T_max=T_max,
+        S=S,
+        T0=T0,
+        alpha=alpha,
+        epochs=epochs,
+        N_per_epochs=N_per_epochs,
+        delta=delta,
+        ext=ext
     )
     optim_solution.solver_summary(save=SAVE)
     optim_solution.plot_cost_hist(save=SAVE)
-    Coordinate.plot_solution( 
+    Coordinate.plot_solution(
         initial_coords, initial_solution, loc_bar, optim_solution.xf,
         optim_solution.final_loc_bar, S, ext=ext, save=SAVE
     )
