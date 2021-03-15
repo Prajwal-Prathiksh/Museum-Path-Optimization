@@ -1,4 +1,9 @@
 ###########################################################################
+# In main directory
+# Usage: '$ python code/branch_and_bound/time_opti.py'
+#
+# Check '$ python code/branch_and_bound/time_opti.py -h' for help
+###########################################################################
 # Imports
 ###########################################################################
 # Standard library imports
@@ -6,10 +11,11 @@ import os
 import sys
 import copy
 import time
-import datetime
 import argparse
 import numpy as np
+from datetime import datetime
 from queue import PriorityQueue
+
 
 sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
@@ -30,11 +36,6 @@ def cmd_line_parser():
     )
 
     parser.add_argument(
-        '-s', '--save', dest='SAVE', type=bool, default=False,
-        help='If true, stores any generated plots and the summary data'
-    )
-
-    parser.add_argument(
         '--ext', dest='ext', type=str, default='',
         help='Add a prefix to the plots, summary_data and summary_log '
         'before saving it'
@@ -46,7 +47,7 @@ def cmd_line_parser():
     )
 
     parser.add_argument(
-        '-d', '--dest', dest='output_dir', type=str,
+        '-d', dest='output_dir', type=str,
         default='BnB', help='Output folder name'
     )
 
@@ -296,7 +297,7 @@ def print_summary(output_dir, node, tc_name=None, ext=''):
             printing(f'Test case name: {tc_name}')
 
         printing(f'\nSolved in: {time_taken} s')
-        printing(f'Number of cost function calls: {reduction_calls}')
+        printing(f'Number of reduction function calls: {reduction_calls}')
 
         print("\nThe optimal tour is:")
         for i in range(N):
@@ -306,16 +307,13 @@ def print_summary(output_dir, node, tc_name=None, ext=''):
 
         print(f'Log file saved at: {logname}')
 
-        # if save:
-        #     fname = os.path.join(self.output_dir, f'{ext}BnB_results.npz')
-        #     np.savez(
-        #         fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
-        #         permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
-        #         reduction_in_cost=reduction_in_cost, T0=T0, alpha=alpha,
-        #         epochs=epochs, N_per_epochs=N_per_epochs,
-        #         cooling_func=cooling_func
-        #     )
-        #     print(f'\nSummary data saved at: {fname}')
+        if True:
+            fname = os.path.join(output_dir, f'{ext}BnB_results.npz')
+            np.savez(
+                fname, time_taken=time_taken, func_calls=reduction_calls,
+                opt_cost=node.cost
+            )
+            print(f'\nSummary data saved at: {fname}')
     finally:
         outputFile.close()
 
@@ -329,7 +327,7 @@ def main():
 
     # Parse command line arguments
     args = cmd_line_parser()
-    SAVE, ext = args.SAVE, args.ext
+    ext = args.ext
 
     # Make output directory
     output_dir = make_output_dir(args.output_dir)
@@ -337,15 +335,17 @@ def main():
     tc_number = args.tc_number
     tc_name, cost_matrix = loader.get_test_data(tc_number)
 
-    COST_MATRIX = cost_matrix
+    # COST_MATRIX = cost_matrix
 
-    # COST_MATRIX = [
-    #     [INF, 10, 8, 9, 7],
-    #     [10, INF, 10, 5, 6],
-    #     [8, 10, INF, 8, 9],
-    #     [9, 5, 8, INF, 6],
-    #     [7, 6, 9, 6, INF]
-    # ]  # optimal cost is 34
+    tc_name = "Manual input"
+
+    COST_MATRIX = [
+        [INF, 10, 8, 9, 7],
+        [10, INF, 10, 5, 6],
+        [8, 10, INF, 8, 9],
+        [9, 5, 8, INF, 6],
+        [7, 6, 9, 6, INF]
+    ]  # optimal cost is 34
 
     # COST_MATRIX = [
     #     [INF, 3, 1, 5, 8],
@@ -373,7 +373,7 @@ def main():
     print_tour(final_node)
     print("Total cost is {}".format(optimal_cost))
 
-    if SAVE:
+    if True:
         print_summary(output_dir, final_node, tc_name=tc_name, ext=ext)
 
 
