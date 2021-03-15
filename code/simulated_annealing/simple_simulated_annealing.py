@@ -2,21 +2,82 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import argparse
+from datetime import datetime
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
+
 sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
 ###########################################################################
 # Code
 ###########################################################################
 OUTPUT_DIR = os.path.join(
-    os.getcwd(), 'output', 'figures', 'simulated_annealing'
+    os.getcwd(), 'output', 'simulated_annealing'
 )
+CFUNCS = ['simp', 'exp']
 
 
+def cli_parser():
+    parser = argparse.ArgumentParser(
+        allow_abbrev=False,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        '--T', action='store', dest='T', type=float,
+        default=40, help='Inital temperature'
+    )
+    parser.add_argument(
+        '--alpha', action='store', dest='alpha', type=float,
+        default=0.99, help='Cooling factor'
+    )
+    parser.add_argument(
+        '--epoch', action='store', dest='epochs', type=int,
+        default=1000, help='Number of epochs'
+    )
+    parser.add_argument(
+        '--n-epoch', action='store', dest='N_per_epochs', type=int,
+        default=100, help='Number of iterations per epoch'
+    )
+    parser.add_argument(
+        '-s', action='store_true', dest='SAVE',
+        help='If true, stores any generated plots and the summary data'
+    )
+    parser.add_argument(
+        '--cfunc', action='store', dest='cfunc', choices=CFUNCS,
+        default='simp', help='Type of cooling function to be used'
+    )
+    parser.add_argument(
+        '--ext', action='store', dest='ext', type=str,
+        default='',
+        help='Add a prefix to the plots, summary_data and summary_log '
+        'before saving it'
+    )
+    parser.add_argument(
+        '--tcn', action='store', dest='tc_number', type=int,
+        default=0, help='Test case number'
+    )
+
+    args = parser.parse_args()
+    return args
+
+
+def function_calls(f):
+    '''
+        Count number of times a function was called. To be used as decorator.
+    '''
+    def wrapped(*args, **kwargs):
+        wrapped.calls += 1
+        return f(*args, **kwargs)
+    wrapped.calls = 0
+    return wrapped
+
+
+@function_calls
 def get_cost_between_two_points(p1, p2, cost_matrix):
     '''
         Calculates the cost between two nodes from the cost matrix.
@@ -39,6 +100,7 @@ def get_cost_between_two_points(p1, p2, cost_matrix):
     return cost
 
 
+@function_calls
 def get_total_cost(node_list, cost_matrix):
     '''
         Calculates the cost of the entire node list.
@@ -56,10 +118,10 @@ def get_total_cost(node_list, cost_matrix):
     '''
     cost = 0.0
     for first, second in zip(node_list[:-1], node_list[1:]):
-        # Distance between successive exhibits are added
+        # Distance between successive nodes are added
         cost += get_cost_between_two_points(first, second, cost_matrix)
 
-    # Distance between the first and the last exhibits is added
+    # Distance between the first and the last nodes is added
     cost += get_cost_between_two_points(
         node_list[0], node_list[-1], cost_matrix
     )
@@ -171,7 +233,7 @@ class Coordinate:
         return coords
 
     @staticmethod
-    def plot_solution(initial_coords, optim_coords):
+    def plot_solution(initial_coords, optim_coords, save=True):
         '''
             Plots the inital and the optimized solution in a convinient format.
 
@@ -181,6 +243,8 @@ class Coordinate:
                 Inital list of Coordinate classes
             optim_coords: (List)
                 Optimized list of Coordinate classes
+            save = (Boolean), default=True
+                If True, saves the plot
 
             Returns:
             --------
@@ -214,8 +278,10 @@ class Coordinate:
         ax1.title.set_text(f'Initial Solution | Cost = {old_cost}')
         ax2.title.set_text(f'Optimized Solution | Cost = {new_cost}')
 
-        fname = os.path.join(OUTPUT_DIR, 'SSA_optimized_solution.png')
-        plt.savefig(fname, dpi=400, bbox_inches='tight')
+        if save:
+            fname = os.path.join(OUTPUT_DIR, 'SSA_optimized_solution.png')
+            plt.savefig(fname, dpi=400, bbox_inches='tight')
+
         plt.show()
 
 
@@ -237,13 +303,22 @@ class SimpleSimulatedAnnealing:
             Cooling factor
         epochs: (int)
             Number of epochs
-        N: (int)
+        N_per_epochs: (int)
             Number of iterations per epoch
+        cooling_func: (string), default=simple
+            Type of cooling function to be used
+            Choose from: ['simp', 'exp']
+        ext: (string), default=''
+            Add a prefix to the plots, summary_data and summary_log before
+            saving it
         **kwargs:
             Additional arguments for `func0`
     '''
 
-    def __init__(self, func0, x0, T0, alpha, epochs, N, **kwargs):
+    def __init__(
+        self, func0, x0, T0, alpha, epochs, N_per_epochs,
+        cooling_func='simp', ext='', **kwargs
+    ):
         '''
             Parameters:
             -----------
@@ -257,24 +332,47 @@ class SimpleSimulatedAnnealing:
                 Cooling factor
             epochs: (int)
                 Number of epochs
-            N: (int)
+            N_per_epochs: (int)
                 Number of iterations per epoch
+            cooling_func: (string), default=simple
+                Type of cooling function to be used
+                Choose from: ['simp', 'exp']
+            ext: (string), default=''
+                Add a prefix to the plots, summary_data and summary_log before
+                saving it
             **kwargs:
                 Additional arguments for `func0`
         '''
+        # Initialize
         self.func0 = func0
+        self.cost0 = round(self.func0(x0, **kwargs), 3)
+        self.func0_calls = 0  # Set number of function calls to zero
         self.x0 = x0.copy()
         self.T0 = T0
         self.alpha = alpha
         self.epochs = epochs
-        self.N = N
+        self.N_per_epochs = N_per_epochs
+        self.ext = ext
+
+        self.cooling_funcs_dict = dict(
+            simp=self.simple_cooling_func, exp=self.exponential_cooling_func
+        )
+
+        self.cooling_func = self.cooling_funcs_dict[cooling_func]
 
         self.len_x0 = len(x0)
 
         # Run Algorithm
         self.xf, self.cost_hist, self.rt = self.run_algorithm(**kwargs)
+        self.costf = round(self.cost_hist[-1], 3)
 
-    def cooling_func(self, T):
+        self.reduction_in_cost = round(
+            np.abs(1 - self.cost0 / self.costf) * 100, 3
+        )
+
+        self.func0_calls = self.func0.calls
+
+    def simple_cooling_func(self, T, epoch_num):
         '''
             A simple cooling function.
 
@@ -282,6 +380,8 @@ class SimpleSimulatedAnnealing:
             -----------
             T: (float)
                 Current temperature
+            epoch_num: (int)
+                Current epoch number
 
             Returns:
             --------
@@ -291,25 +391,57 @@ class SimpleSimulatedAnnealing:
         T_cooled = T * self.alpha
         return T_cooled
 
-    def plot_cost_hist(self, ext=''):
+    def exponential_cooling_func(self, T, epoch_num):
+        '''
+            A simple cooling function.
+
+            Parameters:
+            -----------
+            T: (float)
+                Current temperature
+            epoch_num: (int)
+                Current epoch number
+
+            Returns:
+            --------
+            T_cooled: (float)
+                Cooled temperature
+        '''
+        T_cooled = T * np.math.exp(-self.alpha * epoch_num)
+        return T_cooled
+
+    def plot_cost_hist(self, save=True):
         '''
             Plot the history of cost of the objective function per epoch.
+
+            Parameters:
+            -----------
+            save = (Boolean), default=True
+                If True, saves the plot
 
             Returns:
             --------
             Plot
         '''
+        ext = self.ext
         fig = plt.figure(figsize=(10, 5))
         ax1 = fig.add_subplot(111)
 
         x = np.arange(1, self.epochs + 1)
         ax1.plot(x, self.cost_hist)
 
-        ax1.title.set_text(f'Cost vs Epoch | Runtime: {round(self.rt,1)} s')
+        ax1.title.set_text(f'Cost vs Epoch | Runtime: {self.rt} s')
         ax1.set(xlabel=r'Epochs $\rightarrow$', ylabel='Cost')
 
-        fname = os.path.join(OUTPUT_DIR, f'{ext}SSA_cost_hist.png')
-        plt.savefig(fname, dpi=400, bbox_inches='tight')
+        if save:
+            fname = os.path.join(
+                OUTPUT_DIR, 'figures', f'{ext}SSA_cost_hist.png'
+            )
+            plt.savefig(
+                fname, dpi=400, bbox_inches='tight'
+            )
+            print(f'\nPlot saved at: {fname}')
+
         plt.show()
 
     def run_algorithm(self, **kwargs):
@@ -337,11 +469,11 @@ class SimpleSimulatedAnnealing:
             # Store history of cost
             cost_hist.append(cost0)
 
-            print(f'Epoch: {epoch} | Cost = {round(cost0, 3)}')
+            print(f'Epoch: {epoch} | Cost = {round(cost0, 3)}', end='\r')
 
-            T = self.cooling_func(T)
+            T = self.cooling_func(T, epoch)
 
-            for i in range(self.N):
+            for i in range(self.N_per_epochs):
                 # Exchange two elements and get a new neighbour solution
                 e1, e2 = np.random.randint(0, self.len_x0, size=2)
                 temp = x[e1]
@@ -354,7 +486,7 @@ class SimpleSimulatedAnnealing:
                 if cost1 < cost0:
                     cost0 = cost1
                 else:
-                    if np.random.uniform() < np.exp((cost0 - cost1) / T):
+                    if np.random.uniform() < np.math.exp((cost0 - cost1) / T):
                         cost0 = cost1
                     else:
                         # Re-swap
@@ -366,52 +498,154 @@ class SimpleSimulatedAnnealing:
         rt = toc - tic
 
         cost_hist = np.array(cost_hist)
-        return x, cost_hist, rt
+        return x, cost_hist, round(rt, 3)
+
+    def solver_summary(self, tc_name=None, save=True):
+        '''
+            Prints the solver summary, and stores it in a `.npz` file.
+
+            Parameters:
+            -----------
+            optim_solution: (Class - SimpleSimulatedAnnealing)
+                Instance of the `SimpleSimulatedAnnealing` class
+            save = (Boolean), default=True
+                If True, saves the metadata in a `.npz` file
+        '''
+        ext = self.ext
+        try:
+            logname = os.path.join(OUTPUT_DIR, f'{ext}SSA_solver_summary.log')
+            if os.path.exists(logname):
+                os.remove(logname)
+
+            outputFile = open(logname, 'a')
+
+            def printing(text):
+                print(text)
+                if outputFile:
+                    outputFile.write(f'{text}\n')
+
+            rt, func0_calls = self.rt, self.func0.calls
+            printing('\n===================================================')
+            printing('Solver Summary:')
+            printing('===================================================')
+            dt_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            pc_name = os.environ['COMPUTERNAME']
+            printing(f'\nRun on: {dt_string} | PC: {pc_name}')
+            if tc_name is not None:
+                printing(f'Test case name: {tc_name}')
+
+            printing(f'\nSolved in: {rt} s')
+            printing(f'Number of cost function calls: {func0_calls}')
+
+            x0_len = len(self.x0)
+            printing(f'\nTotal number of nodes: {x0_len}')
+            permut = SimpleSimulatedAnnealing.factorial_apprx(x0_len)
+            printing(f'Total permutations: {permut}')
+
+            x0, xf = self.x0, self.xf
+            cost0, costf = self.cost0, self.costf
+            printing(
+                f'\nInitial Cost: {cost0} ---> Optimized Cost: {costf}'
+            )
+            reduction_in_cost = self.reduction_in_cost
+            printing(f'Reduction in cost (in %): {reduction_in_cost} %')
+
+            T0, alpha = self.T0, self.alpha
+            epochs = self.epochs
+            N_per_epochs = self.N_per_epochs
+            cooling_func = self.cooling_func.__name__
+            printing(f'\nT0 = {T0} | alpha = {alpha}')
+            printing(f'epochs = {epochs} | iter/epoch = {N_per_epochs}')
+            printing(f'Cooling Function: {cooling_func}()')
+
+            printing('\n===================================================\n')
+
+            print(f'Log file saved at: {logname}')
+
+            if save:
+                fname = os.path.join(OUTPUT_DIR, f'{ext}SSA_results.npz')
+                np.savez(
+                    fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
+                    permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
+                    reduction_in_cost=reduction_in_cost, T0=T0, alpha=alpha,
+                    epochs=epochs, N_per_epochs=N_per_epochs,
+                    cooling_func=cooling_func
+                )
+                print(f'\nSummary data saved at: {fname}')
+        finally:
+            outputFile.close()
+
+    @staticmethod
+    def factorial_apprx(N):
+        '''
+            Find the approximate of the factorial of a large number!
+
+            Parameters:
+            -----------
+            N: (int)
+                Number for which the approximate factorial needs to be
+                calculated
+
+            Returns:
+            --------
+            res: (string)
+                Approximate factorial
+        '''
+        P = np.math.factorial(N)
+        res = int(np.floor(np.math.log10(P)))
+        P = str(P)
+        res = f'{P[0]}.{P[1]}{P[2]}e{res}'
+
+        return res
 
 
 ###########################################################################
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    from code.data_input.base_input import BaseInputLoader
+    # Local import
+    from code.data_input.base_input import TestCaseLoader
+
+    # Read data off of standard library
+    loader = TestCaseLoader()
+
+    # Parse CLI arguments
+    args = cli_parser()
 
     # Set-up parameters for the Simulated Annealing Algorithm
-    T0, alpha, outer_N, inner_N = [40, 0.99, 1000, 200]
+    T0, alpha = args.T, args.alpha
+    epochs, N_per_epochs = args.epochs, args.N_per_epochs
+    SAVE, ext = args.SAVE, args.ext
+    cfunc = args.cfunc
+
+    # Initial solution
+    tc_number = args.tc_number
+    tc_name, cost_matrix = loader.get_test_data(tc_number)
+    num_nodes = np.shape(cost_matrix)[0]
+    np.random.seed(0)
+    initial_soln = np.random.permutation(np.arange(num_nodes))
+
+    # Set up Simulated Annealing Class
+    optim_solution = SimpleSimulatedAnnealing(
+        func0=get_total_cost, x0=initial_soln, T0=T0, alpha=alpha,
+        epochs=epochs, N_per_epochs=N_per_epochs, cost_matrix=cost_matrix,
+        cooling_func=cfunc, ext=ext
+    )
+
+    optim_solution.solver_summary(tc_name=tc_name, save=SAVE)
+    optim_solution.plot_cost_hist(save=SAVE)
 
     # ---------------------------------------------------------------------
     # Generate random coordinates
-    # initial_coords = Coordinate.random_coordinates_list(80, seed=0)
+    # initial_coords = Coordinate.random_coordinates_list(n=80, seed=0)
 
     # Set up Simulated Annealing Class
     # optim_solution = SimpleSimulatedAnnealing(
     #     func0=Coordinate.get_total_distance, x0=initial_coords, T0=T0,
-    #     alpha=alpha, epochs=outer_N, N=inner_N
+    #     alpha=alpha, epochs=epochs, N=N_per_epochs
     # )
 
     # optim_solution.plot_cost_hist()
     # Coordinate.plot_solution(initial_coords, optim_solution.xf)
 
     # ---------------------------------------------------------------------
-
-    # Read data off of standard library
-    fpath = os.path.join(os.getcwd(), 'code', 'data_input', 'test_load_list')
-    loader = BaseInputLoader(fpath)
-
-    fpath = os.path.join(os.getcwd(), 'code', 'data_input', 'test_load_list')
-    loader = BaseInputLoader(fpath)
-    cost_matrix = loader.get_input_test_case(1).get_cost_matrix()
-
-    num_nodes = np.shape(cost_matrix)[0]
-
-    np.random.seed(0)
-    initial_soln = np.random.permutation(np.arange(num_nodes))
-
-    print('Loaded Input!')
-
-    # Set up Simulated Annealing Class
-    optim_solution = SimpleSimulatedAnnealing(
-        func0=get_total_cost, x0=initial_soln, T0=T0,
-        alpha=alpha, epochs=outer_N, N=inner_N, cost_matrix=cost_matrix
-    )
-
-    optim_solution.plot_cost_hist(ext='node_')
