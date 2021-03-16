@@ -141,3 +141,5 @@ dmypy.json
 Thumbs.db
 desktop.ini
 
+# Output files
+output/
