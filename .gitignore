@@ -131,3 +131,6 @@ dmypy.json
 # Some windows files
 Thumbs.db
 desktop.ini
+
+# VS Code settings file
+*.vscode/
