@@ -35,6 +35,10 @@ def cli_parser():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
+        '-n', action='store', dest='n', type=int,
+        default=50, help='Total number of exhibits in the Muesuem'
+    )
+    parser.add_argument(
         '--vel', action='store', dest='vel', type=float,
         default=1.0, help='Velocity of the tourist (in m/s)'
     )
@@ -48,7 +52,7 @@ def cli_parser():
         default=10, help='Number of iterations after which solution is shaken'
     )
     parser.add_argument(
-        '--T', action='store', dest='T', type=float,
+        '-T', action='store', dest='T', type=float,
         default=40, help='Inital temperature'
     )
     parser.add_argument(
@@ -64,7 +68,7 @@ def cli_parser():
         default=100, help='Number of iterations per epoch'
     )
     parser.add_argument(
-        '--k', action='store', dest='k', type=float,
+        '-k', action='store', dest='k', type=float,
         default=0.6, help='Probability of increasing the exhibits visited'
     )
     parser.add_argument(
@@ -80,10 +84,6 @@ def cli_parser():
         default='',
         help='Add a prefix to the plots, summary_data and summary_log '
         'before saving it'
-    )
-    parser.add_argument(
-        '--tcn', action='store', dest='tc_number', type=int,
-        default=0, help='Test case number'
     )
     parser.add_argument(
         '-d', action='store', dest='output_dir', type=str,
@@ -202,13 +202,73 @@ class Coordinate:
         if seed is None:
             np.random.seed()
         else:
-            np.random.seed(0)
+            np.random.seed(seed)
 
         coords = []
         for i in range(n):
             coords.append(Coordinate(np.random.uniform(), np.random.uniform()))
 
         return coords
+
+    @staticmethod
+    def get_feasible_solution(
+        n, velocity, T_max, seed=None, low=1.0, high=5.0
+    ): 
+        '''
+            Generate an initial feasible solution to optimize the path taken by
+            a tourist in a Muesuem and a corresponding Satisfaction array for 
+            each of the exhibit in the Muesuem.
+
+            Parameters:
+            -----------
+            n: (int)
+                Total number of exhibits in the Muesuem
+            velocity: (float):
+                Velocity of the tourist (in m/s)
+            T_max: (int)
+                Maximum time the tourist can spend in the museum (in s)
+            seed: (int), default=None
+                Reseed random number generator
+            low & high: (int)
+                Return random integers from the "discrete uniform" 
+                distribution of the specified dtype in the "half-open" 
+                interval [low, high). If high is None (the default), then 
+                results are from [0, low).
+
+            Returns:
+            --------
+            initial_coords: (List)
+                List of Coordinate instances
+            initial_solution: (List)
+                List of Coordinate indices corresponding to a feasible solution
+            S: (List)
+                Array of satisfaction level of each exhibit in the Muesuem
+            loc_bar: (int)
+                Number of exhibits that are to be visited by the tourist
+        '''
+        initial_coords = Coordinate.random_coordinates_list(n, seed=seed)
+
+        if seed is None:
+            np.random.seed()
+        else:
+            np.random.seed(seed)
+
+        S, initial_solution =[], []
+        for i in range(n):
+            S.append(np.random.randint(low=low, high=high,))
+            initial_solution.append(i)
+
+        loc_bar = np.random.randint(1, n)
+
+        while(
+            not Coordinate.constraints(
+                initial_solution[:loc_bar], initial_coords, velocity, T_max
+            )
+        ):
+            np.random.shuffle(initial_solution)
+            loc_bar = np.random.randint(1, n)
+
+        return initial_coords, initial_solution, S, loc_bar
 
     @staticmethod
     @function_calls
@@ -301,6 +361,8 @@ class Coordinate:
                 List of final indices
             final_loc_bar: (int)
                 Final location of bar, number of exhibits visited
+            S: (List)
+                Array of satisfaction level of each exhibit in the Muesuem
             output_dir: (string)
                 Absolute path of the output directory
             ext: (string), default=''
@@ -312,37 +374,59 @@ class Coordinate:
             --------
             Plot
         '''
-        fig = plt.figure(figsize=(10, 5))
+        fig = plt.figure(figsize=(16, 6))
         ax1 = fig.add_subplot(121)
         ax2 = fig.add_subplot(122)
+        cmap_n_digit = 3 #round(max(S)*0.5)
 
         # Initial Solution
         for i in range(0, loc_bar - 1):
             first = initial_coords[initial_solution[i]]
             second = initial_coords[initial_solution[i + 1]]
-            ax1.plot([first.x, second.x], [first.y, second.y], 'b')
-        ax1.plot([initial_coords[initial_solution[0]].x,
-                  initial_coords[initial_solution[-1]].x],
-                 [initial_coords[initial_solution[0]].y,
-                  initial_coords[initial_solution[-1]].y],
-                 'b')
+            ax1.plot(
+                [first.x, second.x], [first.y, second.y], 'k--', linewidth=0.65
+            )
+       
+        print('------------------')
+        print(initial_solution[:loc_bar])
+        ax1.plot(
+            [initial_coords[initial_solution[0]].x,
+            initial_coords[initial_solution[loc_bar-1]].x],
+            [initial_coords[initial_solution[0]].y,
+            initial_coords[initial_solution[loc_bar-1]].y],
+            'k--', linewidth=0.65
+        )
 
+        coord_x, coord_y = [], []
         for c in initial_coords:
-            ax1.plot(c.x, c.y, 'ro')
+            coord_x.append(c.x)
+            coord_y.append(c.y)
+
+        ax1.scatter(
+            coord_x, coord_y,
+            c=S, lw=0.1, cmap=plt.cm.get_cmap('jet', cmap_n_digit)
+        )
 
         # Optimized Solution
         for i in range(0, final_loc_bar - 1):
             first = initial_coords[final_solution[i]]
             second = initial_coords[final_solution[i + 1]]
-            ax2.plot([first.x, second.x], [first.y, second.y], 'b')
-        ax2.plot([initial_coords[final_solution[0]].x,
-                  initial_coords[final_solution[-1]].x],
-                 [initial_coords[final_solution[0]].y,
-                  initial_coords[final_solution[-1]].y],
-                 'b')
-
-        for c in initial_coords:
-            ax2.plot(c.x, c.y, 'ro')
+            ax2.plot(
+                [first.x, second.x], [first.y, second.y], 'k--', linewidth=0.65
+            )
+        
+        ax2.plot(
+            [initial_coords[final_solution[0]].x,
+            initial_coords[final_solution[final_loc_bar-1]].x],
+            [initial_coords[final_solution[0]].y,
+            initial_coords[final_solution[final_loc_bar-1]].y],
+            'k--', linewidth=0.65
+        )
+        
+        im = ax2.scatter(
+            coord_x, coord_y, 
+            c=S, lw=0.1, cmap=plt.cm.get_cmap('jet', cmap_n_digit)
+        )
 
         old_cost = round(Coordinate.satisfaction(
             initial_solution[:loc_bar], S), 2)
@@ -351,6 +435,10 @@ class Coordinate:
 
         ax1.title.set_text(f'Initial Solution | Cost = {old_cost}')
         ax2.title.set_text(f'Optimized Solution | Cost = {new_cost}')
+
+        fig.colorbar(
+            im, ax=[ax1, ax2], label=r'Satisfaction Level $\rightarrow$'
+        )
 
         if save:
             fname = os.path.join(
@@ -473,6 +561,12 @@ class ComplexSimulatedAnnealing:
         self.k = k
         self.ext = ext
 
+        # Print initial conditions
+        print(f'\nTotal Number of Epochs: {self.epochs}')
+        print(f'Initial Cost: {self.cost0} | ' +\
+            f'Inital Exhibits visited: {self.loc_bar}\n'
+        )
+
         # Cooling function
         self.cooling_funcs_dict = dict(
             simp=self.simple_cooling_func, exp=self.exponential_cooling_func
@@ -562,6 +656,7 @@ class ComplexSimulatedAnnealing:
                 fname, dpi=400, bbox_inches='tight'
             )
             print(f'\nPlot saved at: {fname}')
+        plt.close()
 
     @staticmethod
     def apply_swap(x, loc_bar):
@@ -866,23 +961,15 @@ if __name__ == '__main__':
     output_dir = make_output_dir(args.output_dir)
 
     # Generate random coordinates, initial solution that satifies constraints
+    n = args.n
     velocity, T_max, delta, k = args.vel, args.T_max, args.delta, args.k
+    
+    feasible_solution = Coordinate.get_feasible_solution(
+        n, velocity, T_max, seed=1, low=0, high=11
+    )
 
-    initial_coords = Coordinate.random_coordinates_list(50, seed=0)
+    initial_coords, initial_solution, S, loc_bar = feasible_solution
 
-    S = []
-    initial_solution = []
-    for i in range(len(initial_coords)):
-        S.append(np.random.uniform())
-        initial_solution.append(i)
-    loc_bar = np.random.randint(1, len(initial_solution))
-    while(
-        not Coordinate.constraints(
-            initial_solution[:loc_bar], initial_coords, velocity, T_max
-        )
-    ):
-        np.random.shuffle(initial_solution)
-        loc_bar = np.random.randint(1, len(initial_solution))
 
     # Set-up parameters for the Simulated Annealing Algorithm
     T0, alpha, k = args.T, args.alpha, args.k
