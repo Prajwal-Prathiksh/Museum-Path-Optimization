@@ -799,12 +799,13 @@ class ComplexSimulatedAnnealing:
             increase_in_cost = self.increase_in_cost
             printing(f'Increase in cost (in %): {increase_in_cost} %')
 
-            T0, alpha, delta = self.T0, self.alpha, self.delta
+            T0, alpha, delta, k = self.T0, self.alpha, self.delta, self.k
             epochs = self.epochs
             N_per_epochs = self.N_per_epochs
             vel, T_max = self.velocity, self.T_max
             cooling_func = self.cooling_func.__name__
-            printing(f'\nT0 = {T0} | alpha = {alpha} | delta = {delta}')
+            printing(f'\nT0 = {T0} | alpha = {alpha}')
+            printing(f'delta = {delta} | k = {k}')
             printing(f'epochs = {epochs} | iter/epoch = {N_per_epochs}')
             printing(f'Velocity = {vel} | T_max = {T_max}')
             printing(f'Cooling Function: {cooling_func}()')
