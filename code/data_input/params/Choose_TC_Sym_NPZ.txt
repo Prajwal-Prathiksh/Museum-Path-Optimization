@@ -1,7 +1,7 @@
 TSPLIB_NPZ
 SYM
 burma14
-att48
+bayg29
 berlin52
 bier127
 brg180
