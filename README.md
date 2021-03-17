@@ -41,18 +41,21 @@ $ python code/branch_and_bound/time_opti.py -h
 ### Simulated Annealing
 
 **Simple Algorithm**
+
 To run the simple simulated annealing algorithm, do the following from root:
 ```
 $ python code/simulated_annealing/simple_simulated_annealing.py
 ```
 
 **Complex Algorithm**
+
 To run the complex simulated annealing algorithm, do the following from root:
 ```
 $ python code/simulated_annealing/complex_simulated_annealing.py
 ```
 
 **Automator**
+
 To run the automator file, do the following from root:
 ```
 $ python code\simulated_annealing\automate.py
