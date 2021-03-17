@@ -1,3 +1,7 @@
 TSPLIB_NPZ
 ASYM
 br17
+ft53
+ftv33
+kro124
+rbg403

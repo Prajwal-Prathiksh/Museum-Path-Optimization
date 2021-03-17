@@ -4,9 +4,12 @@
 # Standard library imports
 import os
 import numpy as np
+import sys
 
-from bass_input import BaseInputLoader
-from file_reader import TxtFileRead
+sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
+
+from code.data_input.bass_input import BaseInputLoader
+from code.data_input.file_reader import TxtFileRead
 ###########################################################################
 # Code
 ###########################################################################
