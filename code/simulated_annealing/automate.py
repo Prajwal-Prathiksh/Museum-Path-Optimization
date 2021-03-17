@@ -37,12 +37,12 @@ def list_input_filter_cases(runs, predicate=None, **params):
     return list(filter(_check_match, runs))
 
 
-class complex_simulated_annealing(Problem):
+class ComplexSimulatedAnnealing(Problem):
     def get_name(self):
         return 'complex_simulated_annealing'
 
     def _plot_cost_history(self, ext='', **kwargs):
-        fig, axs = plt.subplots(1, 1, figsize=(19.2, 10.8))
+        fig, axs = plt.subplots(1, 1, figsize=(12, 6))
 
         cases = list_input_filter_cases(self.cases, **kwargs)
         for case in cases:
@@ -84,16 +84,53 @@ class complex_simulated_annealing(Problem):
 
     def run(self):
         self.make_output_dir()
-        self._plot_cost_history(ext='epoch_1000_', epoch=1000, )
+        self._plot_cost_history(ext='epoch_1000_', epoch=1000,)
+
+class SimpleSimulatedAnnealing(ComplexSimulatedAnnealing):
+    def get_name(self):
+        return 'simple_simulated_annealing'
+
+    def setup(self):
+        get_path = self.input_path
+
+        # Base commands
+        code_name = 'code/simulated_annealing/simple_simulated_annealing.py'
+        base_cmd = f'python {code_name} --s --d $output_dir'
+
+        self.epochs = 1
+
+        # Make cases
+        self.cases = [
+            Simulation(
+                root=get_path(f'e_{self.epochs}_n_{i}'),
+                job_info=dict(n_core=1, n_thread=1),
+                base_command=base_cmd,
+                n_epoch=i,
+                epoch=self.epochs,
+                cfunc='simp',
+                alpha=1e-4,
+                T=1e7,
+                tcn=3,
+            )
+            for i in range(60, 150, 30)
+        ]
+    
+    def run(self):
+        self.make_output_dir()
+        self._plot_cost_history(ext='epoch_1000_', epoch=self.epochs)
+
 
 
 ###########################################################################
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
+    PROBLEMS = [
+        SimpleSimulatedAnnealing, ComplexSimulatedAnnealing
+    ]
     automator = Automator(
         simulation_dir='output/simulated_annealing/automate',
         output_dir='output/simulated_annealing/automate/figures',
-        all_problems=[complex_simulated_annealing]
+        all_problems=PROBLEMS
     )
     automator.run()
