@@ -19,7 +19,7 @@ sys.path.insert(0,os.getcwd())
 # Code
 #############
 
-# Local import
+#Symmetric Test Cases
 from code.data_input.base_input import TestCaseLoader
 # Read data off of standard library
 loader = TestCaseLoader()
@@ -27,8 +27,10 @@ loader = TestCaseLoader()
 tc_number=5
 tc_name, cost_matrix = loader.get_test_data(tc_number)
 
+#Assymetric test cases
 # from code.data_input.input_final import get_input_loader
 # loader = get_input_loader('ChooseTC_Asym_XML', False)
+# tc_number=5
 # tc = loader.get_input_test_case(tc_number)
 # tc_name = loader.get_test_case_name(tc_number)
 # cost_matrix = tc.get_cost_matrix()
