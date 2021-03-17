@@ -34,7 +34,7 @@ Cij=cost_matrix
 
 
 iteration = 20
-n_ants = 5
+n_ants = 100
 n_citys = len(Cij[0])
 Tmax = 1000000   #given value of maximum time 
 velocity = 1  #for calculating time 
