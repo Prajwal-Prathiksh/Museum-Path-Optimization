@@ -1,3 +1,7 @@
 TSPLIB_NPZ
 SYM
-a280
+burma14
+att48
+berlin52
+bier127
+brg180

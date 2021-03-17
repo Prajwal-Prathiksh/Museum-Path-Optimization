@@ -2,6 +2,6 @@ TSPLIB_NPZ
 ASYM
 br17
 ft53
-ft70
 ftv64
+ft70
 rbg403
