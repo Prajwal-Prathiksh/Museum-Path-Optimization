@@ -35,4 +35,4 @@ def gen_npz_from_xml(all_tc_fname, ds_type):
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    gen_npz_from_xml('AllTC_Sym_XML', 'SYM')
+    gen_npz_from_xml('All_TC_Asym_XML', 'ASYM')
