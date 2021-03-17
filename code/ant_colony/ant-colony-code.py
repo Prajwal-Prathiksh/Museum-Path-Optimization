@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #############
 # Imports
 #############
@@ -8,7 +10,7 @@ import time
 import os
 import sys
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from numpy import inf
 
 sys.path.insert(0,os.getcwd())
@@ -22,9 +24,20 @@ from code.data_input.base_input import TestCaseLoader
 # Read data off of standard library
 loader = TestCaseLoader()
 #given values for the problems
-tc_number=1
+tc_number=5
 tc_name, cost_matrix = loader.get_test_data(tc_number)
 
+# from code.data_input.input_final import get_input_loader
+# loader = get_input_loader('ChooseTC_Asym_XML', False)
+# tc = loader.get_input_test_case(tc_number)
+# tc_name = loader.get_test_case_name(tc_number)
+# cost_matrix = tc.get_cost_matrix()
+
+
+
+
+
+print('tc_name=',tc_name)
 Cij=cost_matrix
 # Cij = np.array([[0,10,12,11,14]
 #           ,[10,0,13,15,8]
@@ -33,10 +46,10 @@ Cij=cost_matrix
 #           ,[14,8,14,16,0]])
 
 
-iteration = 20
+iteration = 35
 n_ants = 100
 n_citys = len(Cij[0])
-Tmax = 1000000   #given value of maximum time 
+Tmax = 100000000   #given value of maximum time 
 velocity = 1  #for calculating time 
 t = 2             #constant given in Problem in time taken formula
 
@@ -106,8 +119,10 @@ for i in range(iteration):
             combine_feature = np.multiply(p_feature,v_feature)     #calculating the combine feature
                         
             total = np.sum(combine_feature)                        #sum of all the feature
-            
-            probs = combine_feature/total   #finding probability of element probs(i) = comine_feature(i)/total
+            if total == 0:
+                probs = 1
+            else:
+                probs = combine_feature/total   #finding probability of element probs(i) = comine_feature(i)/total
             #print(probs)
             cum_prob = np.cumsum(probs)     #calculating cummulative sum
             #print(cum_prob)
