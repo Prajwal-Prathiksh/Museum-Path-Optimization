@@ -114,6 +114,15 @@ venv.bak/
 .spyderproject
 .spyproject
 
+# VisualStudioCode
+*.vscode/
+*.code-workspace
+
+# VisualStudioCode Patch
+# Ignore all local history of files
+.history
+.ionide
+
 # Rope project settings
 .ropeproject
 
@@ -131,3 +140,7 @@ dmypy.json
 # Some windows files
 Thumbs.db
 desktop.ini
+
+# Output files
+output/
+config.json
