@@ -3,9 +3,11 @@
 ###########################################################################
 # Standard library imports
 import os
+import sys
 import numpy as np
+sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
-from data_containers import TsplibXMLFileContainer, TsplibNpzFileContainer, TsplibOptDataContainer
+from code.data_input.data_containers import TsplibXMLFileContainer, TsplibNpzFileContainer, TsplibOptDataContainer
 ###########################################################################
 # Code
 ###########################################################################

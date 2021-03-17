@@ -3,10 +3,12 @@
 ###########################################################################
 # Standard library imports
 import os
+import sys
 import numpy as np
+sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
-from base_data_containers import BaseTsplibFileContainer, BaseOptimalDataContainer
-from file_reader import XMLFileRead, NpzFileRead, TxtFileRead
+from code.data_input.base_data_containers import BaseTsplibFileContainer, BaseOptimalDataContainer
+from code.data_input.file_reader import XMLFileRead, NpzFileRead, TxtFileRead
 ###########################################################################
 # Code
 ###########################################################################
