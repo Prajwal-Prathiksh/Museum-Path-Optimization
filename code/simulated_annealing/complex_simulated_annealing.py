@@ -16,17 +16,28 @@ sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 ###########################################################################
 # Code
 ###########################################################################
+global OUTPUT_DIR
 OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'simulated_annealing'
 )
+if os.path.exists(OUTPUT_DIR) is False:
+    os.mkdir(OUTPUT_DIR)
+
 CFUNCS = ['simp', 'exp']
 
 
 def make_output_dir(folder_name, OUTPUT_DIR=OUTPUT_DIR):
-    output_dir = os.path.join(OUTPUT_DIR, folder_name)
-    if os.path.exists(output_dir) is False:
-        os.mkdir(output_dir)
-    return output_dir
+    if folder_name is None:
+        output_dir = os.path.join(OUTPUT_DIR, 'CSA')
+        if os.path.exists(output_dir) is False:
+            os.mkdir(output_dir)
+        return output_dir
+
+    else:
+        if os.path.exists(folder_name) is False:
+            os.mkdir(folder_name)
+            OUTPUT_DIR = folder_name
+        return folder_name
 
 
 def cli_parser():
@@ -35,7 +46,7 @@ def cli_parser():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        '-n', action='store', dest='n', type=int,
+        '--n', action='store', dest='n', type=int,
         default=50, help='Total number of exhibits in the Muesuem'
     )
     parser.add_argument(
@@ -52,7 +63,7 @@ def cli_parser():
         default=10, help='Number of iterations after which solution is shaken'
     )
     parser.add_argument(
-        '-T', action='store', dest='T', type=float,
+        '--T', action='store', dest='T', type=float,
         default=40, help='Inital temperature'
     )
     parser.add_argument(
@@ -68,11 +79,11 @@ def cli_parser():
         default=100, help='Number of iterations per epoch'
     )
     parser.add_argument(
-        '-k', action='store', dest='k', type=float,
+        '--k', action='store', dest='k', type=float,
         default=0.6, help='Probability of increasing the exhibits visited'
     )
     parser.add_argument(
-        '-s', action='store_true', dest='SAVE',
+        '--s', action='store_true', dest='SAVE',
         help='If true, stores any generated plots and the summary data'
     )
     parser.add_argument(
@@ -86,8 +97,8 @@ def cli_parser():
         'before saving it'
     )
     parser.add_argument(
-        '-d', action='store', dest='output_dir', type=str,
-        default='CSA', help='Output folder name'
+        '--d', action='store', dest='output_dir', type=str,
+        default=None, help='Output folder name'
     )
 
     args = parser.parse_args()
@@ -213,10 +224,10 @@ class Coordinate:
     @staticmethod
     def get_feasible_solution(
         n, velocity, T_max, seed=None, low=1.0, high=5.0
-    ): 
+    ):
         '''
             Generate an initial feasible solution to optimize the path taken by
-            a tourist in a Muesuem and a corresponding Satisfaction array for 
+            a tourist in a Muesuem and a corresponding Satisfaction array for
             each of the exhibit in the Muesuem.
 
             Parameters:
@@ -230,9 +241,9 @@ class Coordinate:
             seed: (int), default=None
                 Reseed random number generator
             low & high: (int)
-                Return random integers from the "discrete uniform" 
-                distribution of the specified dtype in the "half-open" 
-                interval [low, high). If high is None (the default), then 
+                Return random integers from the "discrete uniform"
+                distribution of the specified dtype in the "half-open"
+                interval [low, high). If high is None (the default), then
                 results are from [0, low).
 
             Returns:
@@ -253,7 +264,7 @@ class Coordinate:
         else:
             np.random.seed(seed)
 
-        S, initial_solution =[], []
+        S, initial_solution = [], []
         for i in range(n):
             S.append(np.random.randint(low=low, high=high,))
             initial_solution.append(i)
@@ -377,7 +388,7 @@ class Coordinate:
         fig = plt.figure(figsize=(16, 6))
         ax1 = fig.add_subplot(121)
         ax2 = fig.add_subplot(122)
-        cmap_n_digit = 3 #round(max(S)*0.5)
+        cmap_n_digit = 3  # round(max(S)*0.5)
 
         # Initial Solution
         for i in range(0, loc_bar - 1):
@@ -386,14 +397,12 @@ class Coordinate:
             ax1.plot(
                 [first.x, second.x], [first.y, second.y], 'k--', linewidth=0.65
             )
-       
-        print('------------------')
-        print(initial_solution[:loc_bar])
+
         ax1.plot(
             [initial_coords[initial_solution[0]].x,
-            initial_coords[initial_solution[loc_bar-1]].x],
+             initial_coords[initial_solution[loc_bar - 1]].x],
             [initial_coords[initial_solution[0]].y,
-            initial_coords[initial_solution[loc_bar-1]].y],
+             initial_coords[initial_solution[loc_bar - 1]].y],
             'k--', linewidth=0.65
         )
 
@@ -414,17 +423,17 @@ class Coordinate:
             ax2.plot(
                 [first.x, second.x], [first.y, second.y], 'k--', linewidth=0.65
             )
-        
+
         ax2.plot(
             [initial_coords[final_solution[0]].x,
-            initial_coords[final_solution[final_loc_bar-1]].x],
+             initial_coords[final_solution[final_loc_bar - 1]].x],
             [initial_coords[final_solution[0]].y,
-            initial_coords[final_solution[final_loc_bar-1]].y],
+             initial_coords[final_solution[final_loc_bar - 1]].y],
             'k--', linewidth=0.65
         )
-        
+
         im = ax2.scatter(
-            coord_x, coord_y, 
+            coord_x, coord_y,
             c=S, lw=0.1, cmap=plt.cm.get_cmap('jet', cmap_n_digit)
         )
 
@@ -527,7 +536,8 @@ class ComplexSimulatedAnnealing:
             delta: (int)
                 Number of iterations after which solution is shaken
             k: (float)
-                Between (0-1), Probabilty that the number of exhibits visited increases
+                Between (0-1), Probabilty that the number of exhibits visited
+                increases
             output_dir: (string)
                 Absolute path of the output directory
             cooling_func: (string), default=simple
@@ -563,9 +573,9 @@ class ComplexSimulatedAnnealing:
 
         # Print initial conditions
         print(f'\nTotal Number of Epochs: {self.epochs}')
-        print(f'Initial Cost: {self.cost0} | ' +\
-            f'Inital Exhibits visited: {self.loc_bar}\n'
-        )
+        print(f'Initial Cost: {self.cost0} | ' +
+              f'Inital Exhibits visited: {self.loc_bar}\n'
+              )
 
         # Cooling function
         self.cooling_funcs_dict = dict(
@@ -795,7 +805,7 @@ class ComplexSimulatedAnnealing:
             T = self.cooling_func(T, epoch)
 
             for iterator in range(self.N_per_epochs):
-                loc_bar_new = modify_nodes(x, loc_bar,k)
+                loc_bar_new = modify_nodes(x, loc_bar, k)
                 x_new = apply_shake(x, loc_bar_new)
                 cost_new = self.func0(x_new[:loc_bar_new], S)
 
@@ -910,13 +920,14 @@ class ComplexSimulatedAnnealing:
             print(f'Log file saved at: {logname}')
 
             if save:
-                fname = os.path.join(self.output_dir, f'SSA_results.npz')
+                fname = os.path.join(self.output_dir, f'results.npz')
                 np.savez(
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
                     permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
                     increase_in_cost=increase_in_cost, T0=T0, alpha=alpha,
                     delta=delta, epochs=epochs, N_per_epochs=N_per_epochs,
-                    cooling_func=cooling_func, vel=vel, T_max=T_max
+                    cooling_func=cooling_func, vel=vel, T_max=T_max,
+                    cost_hist=self.cost_hist
                 )
                 print(f'\nSummary data saved at: {fname}')
         finally:
@@ -963,13 +974,12 @@ if __name__ == '__main__':
     # Generate random coordinates, initial solution that satifies constraints
     n = args.n
     velocity, T_max, delta, k = args.vel, args.T_max, args.delta, args.k
-    
+
     feasible_solution = Coordinate.get_feasible_solution(
         n, velocity, T_max, seed=1, low=0, high=11
     )
 
     initial_coords, initial_solution, S, loc_bar = feasible_solution
-
 
     # Set-up parameters for the Simulated Annealing Algorithm
     T0, alpha, k = args.T, args.alpha, args.k
