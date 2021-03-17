@@ -46,7 +46,7 @@ Cij=cost_matrix
 #           ,[14,8,14,16,0]])
 
 
-iteration = 35
+iteration = 35          #no of iterations
 n_ants = 100
 n_citys = len(Cij[0])
 Tmax = 100000000   #given value of maximum time 
