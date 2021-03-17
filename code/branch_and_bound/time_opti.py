@@ -43,7 +43,7 @@ def cmd_line_parser():
 
     parser.add_argument(
         '--tcn', dest='tc_number', type=int,
-        default=0, help='Test case number'
+        default=1, help='Test case number'
     )
 
     parser.add_argument(
@@ -310,6 +310,8 @@ def print_summary(output_dir, node, tc_name=None, ext=''):
         for i in range(N):
             print(node.tour[i][0], "-->", node.tour[i][1])
 
+        print("\nTotal cost is {}".format(node.cost))
+
         printing('\n===================================================\n')
 
         print(f'Log file saved at: {logname}')
@@ -327,10 +329,15 @@ def print_summary(output_dir, node, tc_name=None, ext=''):
 
 def main():
     # Local import
-    from code.data_input.base_input import TestCaseLoader
+    from code.data_input.input_final import get_input_loader
 
-    # Read data off of standard library
-    loader = TestCaseLoader()
+    # # Read data off of standard library for symetric
+    # loader = get_input_loader('Choose_TC_Sym_NPZ.txt', False)
+    # print("Solving symetric problem...")
+
+    # Read data off of standard library for assymetric
+    loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
+    print("Solving assymetric problem...")
 
     # Parse command line arguments
     args = cmd_line_parser()
@@ -340,19 +347,21 @@ def main():
     output_dir = make_output_dir(args.output_dir)
 
     tc_number = args.tc_number
-    tc_name, cost_matrix = loader.get_test_data(tc_number)
+    tc_name = loader.get_test_case_name(tc_number)
+    print(tc_name)
+    cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
 
-    # COST_MATRIX = cost_matrix
+    COST_MATRIX = cost_matrix
 
-    tc_name = "Manual input"
+    # tc_name = "Manual input"
 
-    COST_MATRIX = [
-        [INF, 10, 8, 9, 7],
-        [10, INF, 10, 5, 6],
-        [8, 10, INF, 8, 9],
-        [9, 5, 8, INF, 6],
-        [7, 6, 9, 6, INF]
-    ]  # optimal cost is 34
+    # COST_MATRIX = [
+    #     [INF, 10, 8, 9, 7],
+    #     [10, INF, 10, 5, 6],
+    #     [8, 10, INF, 8, 9],
+    #     [9, 5, 8, INF, 6],
+    #     [7, 6, 9, 6, INF]
+    # ]  # optimal cost is 34
 
     # COST_MATRIX = [
     #     [INF, 3, 1, 5, 8],
@@ -374,14 +383,22 @@ def main():
     COST_MATRIX = np.array(COST_MATRIX)
     N = len(COST_MATRIX)
 
+    # Person cannot travel from one node to the same node
+    for i in range(N):
+        COST_MATRIX[i][i] = INF
+
+    print("Number of nodes are {}".format(N))
+
+    # print(COST_MATRIX)
+
     final_node = solve(COST_MATRIX)
     optimal_cost = final_node.cost
 
-    print_tour(final_node)
-    print("Total cost is {}".format(optimal_cost))
-
+    # print_tour(final_node)
     if True:
         print_summary(output_dir, final_node, tc_name=tc_name, ext=ext)
+    
+    print("Total cost is {}".format(optimal_cost))
 
 
 if __name__ == '__main__':
