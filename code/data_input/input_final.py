@@ -3,13 +3,10 @@
 ###########################################################################
 # Standard library imports
 import os
-import sys
 import numpy as np
 
-sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
-
-from code.data_input.bass_input import BaseInputLoader
-from code.data_input.file_reader import TxtFileRead
+from bass_input import BaseInputLoader
+from file_reader import TxtFileRead
 ###########################################################################
 # Code
 ###########################################################################
@@ -17,8 +14,9 @@ from code.data_input.file_reader import TxtFileRead
 
 class GenInternalParams(TxtFileRead):
     def __init__(self, param_file_path):
-        self.file_type_map = {'TSPLIB_XML': [
-            'XML', '.xml'], 'TSPLIB_NPZ': ['NPZ', '.npz']}
+        self.file_type_map = {'SYM_TSPLIB_XML': [
+            'XML', '.xml'], 'TSPLIB_NPZ': ['NPZ', '.npz'],
+            'ASYM_TSPLIB_XML': ['XML', '.xml']}
         self.dataset_type_map = {'SYM': 'Symmetric', 'ASYM': 'Asymmetric'}
         self.param_path = param_file_path
         self.int_param_paths = []
@@ -75,7 +73,7 @@ def get_input_loader(param_file_name, load_opt_solns=True):
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    bl = get_input_loader('AllTC_Sym_NPZ', False)
+    bl = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
     print(bl.get_input_test_cases())
     print(bl.get_input_test_case(1))
-    print(bl.get_input_test_case(1).get_opt_cost())
+    print(bl.get_input_test_case(1).get_cost_matrix())

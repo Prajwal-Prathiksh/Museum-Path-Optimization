@@ -3,11 +3,9 @@
 ###########################################################################
 # Standard library imports
 import os
-import sys
 import numpy as np
-sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
-from code.data_input.data_containers import TsplibXMLFileContainer, TsplibNpzFileContainer, TsplibOptDataContainer
+from data_containers import SymTsplibXMLFileContainer, AsymTsplibXMLFileContainer, TsplibNpzFileContainer, TsplibOptDataContainer
 ###########################################################################
 # Code
 ###########################################################################
@@ -74,10 +72,12 @@ class BaseInputLoader:
         self.OUTPUT_DIR = os.path.join(os.getcwd(), 'data')
 
         self.input_class = BaseInputData
-        self.file_read_type = TsplibXMLFileContainer
+        self.file_read_type = SymTsplibXMLFileContainer
         self.opt_file_read_type = TsplibOptDataContainer
-        self.file_type_map = {'TSPLIB_XML': [
-            TsplibXMLFileContainer, TSPLIBCostMatrixInput, TsplibOptDataContainer],
+        self.file_type_map = {'SYM_TSPLIB_XML': [
+            SymTsplibXMLFileContainer, TSPLIBCostMatrixInput, TsplibOptDataContainer],
+            'ASYM_TSPLIB_XML' : [AsymTsplibXMLFileContainer, TSPLIBCostMatrixInput,
+                           TsplibOptDataContainer],
             'TSPLIB_NPZ': [TsplibNpzFileContainer, TSPLIBCostMatrixInput,
                            TsplibOptDataContainer]}
         self.tc_file_reader_list = []
