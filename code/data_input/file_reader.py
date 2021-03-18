@@ -16,7 +16,7 @@ class FileReadContainer:
         self.file_path = file_path
         self.file_data = []
         self.data_container = []
-        if file_path != None:
+        if file_path is not None:
             self.read_file()
             self.process_file_data()
 

@@ -405,7 +405,7 @@ def main():
     # print_tour(final_node)
     if True:
         print_summary(output_dir, final_node, tc_name=tc_name, ext=ext)
-    
+
     # print("Total cost is {}".format(optimal_cost))
 
 

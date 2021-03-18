@@ -8,10 +8,13 @@ import sys
 
 sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
-from code.data_input.data_containers import SymTsplibXMLFileContainer, AsymTsplibXMLFileContainer, TsplibNpzFileContainer, TsplibOptDataContainer
 ###########################################################################
 # Code
 ###########################################################################
+from code.data_input.data_containers import (
+    SymTsplibXMLFileContainer, AsymTsplibXMLFileContainer,
+    TsplibNpzFileContainer, TsplibOptDataContainer
+)
 
 
 class BaseInputData:
@@ -24,10 +27,10 @@ class BaseInputData:
 
     def generate_input(self, file_read_cont, opt_file_cont):
         self.dataset_name = file_read_cont.get_dataset_name()
-        if file_read_cont != None:
+        if file_read_cont is not None:
             self.cost_data = dict(file_read_cont.get_cost_data())
             self.constraint_data = dict(file_read_cont.get_constraint_data())
-        if opt_file_cont != None:
+        if opt_file_cont is not None:
             self.optimal_data = dict(opt_file_cont.get_opt_data())
 
     def get_dataset_name(self):
@@ -77,18 +80,25 @@ class BaseInputLoader:
         self.input_class = BaseInputData
         self.file_read_type = SymTsplibXMLFileContainer
         self.opt_file_read_type = TsplibOptDataContainer
-        self.file_type_map = {'SYM_TSPLIB_XML': [
-            SymTsplibXMLFileContainer, TSPLIBCostMatrixInput, TsplibOptDataContainer],
-            'ASYM_TSPLIB_XML' : [AsymTsplibXMLFileContainer, TSPLIBCostMatrixInput,
-                           TsplibOptDataContainer],
-            'TSPLIB_NPZ': [TsplibNpzFileContainer, TSPLIBCostMatrixInput,
-                           TsplibOptDataContainer]}
+        self.file_type_map = {
+            'SYM_TSPLIB_XML': [
+                SymTsplibXMLFileContainer,
+                TSPLIBCostMatrixInput,
+                TsplibOptDataContainer],
+            'ASYM_TSPLIB_XML': [
+                AsymTsplibXMLFileContainer,
+                TSPLIBCostMatrixInput,
+                TsplibOptDataContainer],
+            'TSPLIB_NPZ': [
+                TsplibNpzFileContainer,
+                TSPLIBCostMatrixInput,
+                TsplibOptDataContainer]}
         self.tc_file_reader_list = []
         self.opt_file_reader_list = []
         self.input_test_cases = {}
-        if tc_load_list_path != None:
+        if tc_load_list_path is not None:
             self.read_tc_paths(tc_load_list_path)
-        if opt_load_list_path != None:
+        if opt_load_list_path is not None:
             self.read_opt_paths(opt_load_list_path)
 
         self.generate_input_test_cases()

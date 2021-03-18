@@ -3,20 +3,19 @@ import os
 keyw = 'Museum-Path-Optimization'
 prefix = os.path.join(
     os.getcwd().split(keyw)[0],
-     keyw, 
-     'data', 
-     'TSPLIB', 
-     'Asymmetric',
-     'XML')
+    keyw,
+    'data',
+    'TSPLIB',
+    'Asymmetric',
+    'XML')
 
-L = os.listdir(prefix)
-L.sort()
+L = sorted(os.listdir(prefix))
 L = [i.split('.')[0] + '\n' for i in L]
 print(L)
 
 prefix = os.path.join(
     os.getcwd().split(keyw)[0],
-     keyw)
+    keyw)
 fname = os.path.join(
     prefix,
     'code',
@@ -28,4 +27,3 @@ f.write('ASYM_TSPLIB_XML\n')
 f.write('ASYM\n')
 f.writelines(L)
 f.close()
-

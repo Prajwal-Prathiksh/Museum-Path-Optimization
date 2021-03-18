@@ -8,7 +8,7 @@ class Read_opt_cost:
         keyw = 'Museum-Path-Optimization'
         prefix = os.path.join(
             os.getcwd().split(keyw)[0],
-            keyw, 
+            keyw,
             'data',
             fname)
         self.read_data = self.read_fil(prefix)

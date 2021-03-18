@@ -8,11 +8,13 @@ import sys
 
 sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
-from code.data_input.base_data_containers import BaseTsplibFileContainer, BaseOptimalDataContainer
-from code.data_input.file_reader import XMLFileRead, NpzFileRead, TxtFileRead
 ###########################################################################
 # Code
 ###########################################################################
+from code.data_input.file_reader import XMLFileRead, NpzFileRead, TxtFileRead
+from code.data_input.base_data_containers import (
+    BaseTsplibFileContainer, BaseOptimalDataContainer
+)
 
 
 class SymTsplibXMLFileContainer(BaseTsplibFileContainer, XMLFileRead):
@@ -56,7 +58,7 @@ class AsymTsplibXMLFileContainer(BaseTsplibFileContainer, XMLFileRead):
         for vert_indx in range(len(vertices)):
             for i in range(1, len(vertices[vert_indx].childNodes), 2):
                 self.cost_matrix[
-                    vert_indx, (i-1)//2
+                    vert_indx, (i - 1) // 2
                 ] = float(
                     vertices[vert_indx].childNodes[i]
                     ._get_attributes().items()[0][1]

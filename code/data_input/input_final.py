@@ -8,11 +8,11 @@ import sys
 
 sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
-from code.data_input.bass_input import BaseInputLoader
-from code.data_input.file_reader import TxtFileRead
 ###########################################################################
 # Code
 ###########################################################################
+from code.data_input.file_reader import TxtFileRead
+from code.data_input.bass_input import BaseInputLoader
 
 
 class GenInternalParams(TxtFileRead):
@@ -36,14 +36,24 @@ class GenInternalParams(TxtFileRead):
 
         data_pefix = os.path.join(pefix, 'data', 'TSPLIB',
                                   self.dataset_type_map[ds_type])
-        paths1 = [os.path.join(data_pefix, self.file_type_map[file_type][0], i) +
-                  self.file_type_map[file_type][1] + '\n' for i in names]
+        paths1 = [
+            os.path.join(
+                data_pefix,
+                self.file_type_map[file_type][0],
+                i) +
+            self.file_type_map[file_type][1] +
+            '\n' for i in names]
         paths2 = [os.path.join(data_pefix, 'Opt', i) +
                   '.opt.tour.txt' + '\n' for i in names]
 
         internal_nam = self.param_path.split('.')[0].split('/')[-1]
-        int_pefix = os.path.join(pefix, 'code', 'data_input', 'internal_params',
-                                 self.dataset_type_map[ds_type], internal_nam)
+        int_pefix = os.path.join(
+            pefix,
+            'code',
+            'data_input',
+            'internal_params',
+            self.dataset_type_map[ds_type],
+            internal_nam)
         int_fnames = [int_pefix + '_tc', int_pefix + '_opt']
         self.int_param_paths = int_fnames
 
