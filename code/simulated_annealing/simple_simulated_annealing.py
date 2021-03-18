@@ -80,6 +80,10 @@ def cli_parser():
         default=1, help='Test case number'
     )
     parser.add_argument(
+        '--sym', action='store', dest='tc_sym', choices=['sym', 'asym'],
+        default='sym', help='Run symmetric or asymetric standard test cases'
+    )
+    parser.add_argument(
         '--d', action='store', dest='output_dir', type=str,
         default=None, help='Output folder name'
     )
@@ -635,7 +639,7 @@ if __name__ == '__main__':
     # Local import
     # from code.data_input.base_input import TestCaseLoader
     from code.data_input.input_final import get_input_loader
-    
+
     # Parse CLI arguments
     args = cli_parser()
 
@@ -650,11 +654,15 @@ if __name__ == '__main__':
 
     # Initial solution
     tc_number = args.tc_number
+    if args.tc_sym == 'sym':
+        tc_fname = 'Choose_TC_Sym_NPZ.txt'
+    elif args.tc_sym == 'asym':
+        tc_fname = 'Choose_TC_Asym_NPZ.txt'
 
     # Read data off of standard library
     # loader = TestCaseLoader()
-    loader = get_input_loader('Choose_TC_Sym_NPZ.txt', False)
-    tc_name = loader.get_test_case_name(tc_number)    
+    loader = get_input_loader(tc_fname, False)
+    tc_name = loader.get_test_case_name(tc_number)
     cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
 
     num_nodes = np.shape(cost_matrix)[0]
