@@ -415,6 +415,16 @@ def main():
     COST_MATRIX = np.array(COST_MATRIX)
     N = len(COST_MATRIX)
 
+    # Person cannot travel from one node to the same node
+    for i in range(N):
+        COST_MATRIX[i][i] = INF
+
+    # Person cannot travel on restricted edges
+    for i in range(N):
+        for j in range(N):
+            if COST_MATRIX[i][j] == 0:
+                COST_MATRIX[i][j] = INF
+
     # Relation between travel penalty and popularity
     STAMINA = stamina  # higher the stamina, lower is the weightage of travel penalty
 
