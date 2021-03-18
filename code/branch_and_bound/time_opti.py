@@ -43,7 +43,7 @@ def cmd_line_parser():
 
     parser.add_argument(
         '--tcn', dest='tc_number', type=int,
-        default=0, help='Test case number'
+        default=1, help='Test case number'
     )
 
     parser.add_argument(
@@ -100,8 +100,8 @@ class Node():
         self.tour = copy.deepcopy(tour)
         self.reduced_matrix = copy.deepcopy(reduced_matrix)
         self.cost = cost  # stores the lower bound
-        self.Id = Id  # vertex -> stores the current city number
-        self.level = level  # stores the total number of cities visited so far
+        self.Id = Id  # vertex -> stores the current node number
+        self.level = level  # stores the total number of nodes visited so far
 
     def __gt__(self, other):
         if(self.cost > other.cost):
@@ -116,19 +116,19 @@ class Node():
             return False
 
     def debug(self):
-        print("Tour: {} | Cost = {} | Node = {} | Level = {} |".format(
-            self.tour, self.cost, self.Id, self.level), end='\r')
+        print("Tour: {} | Cost = {} | Node = {} | Level = {}".format(
+            self.tour, self.cost, self.Id, self.level))
 
 
 def CreateNode(parent_matrix, tour, level, i, j):
     """
-        Function to allocate a new node `(i, j)` corresponds to visiting city
-        `j` from city `i`
+        Function to allocate a new node `(i, j)` corresponds to visiting node
+        `j` from node `i`
 
         Args:
             parent_matrix (N*N matrix): penalty matrix
             tour (list of [i,j]): edges visited till the node
-            level (int): the total number of cities visited so far
+            level (int): the total number of nodes visited so far
             i (int): come from node Id
             j (int): goto node Id
 
@@ -151,10 +151,10 @@ def CreateNode(parent_matrix, tour, level, i, j):
     # here start node is 0
     node.reduced_matrix[j][0] = INF
 
-    # set number of cities visited so far
+    # set number of nodes visited so far
     node.level = level
 
-    # assign current city number
+    # assign current node number
     node.Id = j
 
     return node
@@ -213,7 +213,7 @@ def solve(cost_matrix):
 
     tour = []
 
-    # The TSP starts from the first city, i.e., node 0
+    # The TSP starts from the first node, i.e., node 0
     root = CreateNode(cost_matrix, tour, 0, -1, 0)
 
     # get the lower bound of the path starting at node 0
@@ -224,13 +224,13 @@ def solve(cost_matrix):
     while not live_nodes.empty():
         # a live node with the least estimated cost is selected
         minimum = live_nodes.get()[1]
-        minimum.debug()
+        # minimum.debug()
 
-        i = minimum.Id  # `i` stores the current city number
+        i = minimum.Id  # `i` stores the current node number
 
-        # if all cities are visited; termination of loop
+        # if all nodes are visited; termination of loop
         if minimum.level == N - 1:
-            minimum.tour.append([i, 0])  # return to starting city
+            minimum.tour.append([i, 0])  # return to starting node
             return minimum  # final node
             break
 
@@ -310,6 +310,8 @@ def print_summary(output_dir, node, tc_name=None, ext=''):
         for i in range(N):
             print(node.tour[i][0], "-->", node.tour[i][1])
 
+        print("\nTotal cost is {}".format(node.cost))
+
         printing('\n===================================================\n')
 
         print(f'Log file saved at: {logname}')
@@ -327,10 +329,15 @@ def print_summary(output_dir, node, tc_name=None, ext=''):
 
 def main():
     # Local import
-    from code.data_input.base_input import TestCaseLoader
+    from code.data_input.input_final import get_input_loader
 
-    # Read data off of standard library
-    loader = TestCaseLoader()
+    # Read data off of standard library for symmetric
+    loader = get_input_loader('Choose_TC_Sym_NPZ.txt', False)
+    print("Solving symmetric problem...")
+
+    # # Read data off of standard library for asymmetric
+    # loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
+    # print("\nSolving asymmetric problem...")
 
     # Parse command line arguments
     args = cmd_line_parser()
@@ -340,19 +347,21 @@ def main():
     output_dir = make_output_dir(args.output_dir)
 
     tc_number = args.tc_number
-    tc_name, cost_matrix = loader.get_test_data(tc_number)
+    tc_name = loader.get_test_case_name(tc_number)
+    print(tc_name)
+    cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
 
-    # COST_MATRIX = cost_matrix
+    COST_MATRIX = cost_matrix
 
-    tc_name = "Manual input"
+    # tc_name = "Manual input"
 
-    COST_MATRIX = [
-        [INF, 10, 8, 9, 7],
-        [10, INF, 10, 5, 6],
-        [8, 10, INF, 8, 9],
-        [9, 5, 8, INF, 6],
-        [7, 6, 9, 6, INF]
-    ]  # optimal cost is 34
+    # COST_MATRIX = [
+    #     [INF, 10, 8, 9, 7],
+    #     [10, INF, 10, 5, 6],
+    #     [8, 10, INF, 8, 9],
+    #     [9, 5, 8, INF, 6],
+    #     [7, 6, 9, 6, INF]
+    # ]  # optimal cost is 34
 
     # COST_MATRIX = [
     #     [INF, 3, 1, 5, 8],
@@ -369,19 +378,35 @@ def main():
     #     [INF, 3, 2, INF]
     # ]  # optimal cost is 8
 
-    # `N` is the total number of total nodes on the graph or cities on the map
+    # `N` is the total number of total nodes on the graph
     global N
     COST_MATRIX = np.array(COST_MATRIX)
     N = len(COST_MATRIX)
 
+    # print(COST_MATRIX)
+
+    # Person cannot travel from one node to the same node
+    for i in range(N):
+        COST_MATRIX[i][i] = INF
+
+    # Person cannot travel on restricted edges
+    for i in range(N):
+        for j in range(N):
+            if COST_MATRIX[i][j] == 0:
+                COST_MATRIX[i][j] = INF
+
+    print("Number of nodes are {}".format(N))
+
+    # print(COST_MATRIX)
+
     final_node = solve(COST_MATRIX)
     optimal_cost = final_node.cost
 
-    print_tour(final_node)
-    print("Total cost is {}".format(optimal_cost))
-
+    # print_tour(final_node)
     if True:
         print_summary(output_dir, final_node, tc_name=tc_name, ext=ext)
+
+    # print("Total cost is {}".format(optimal_cost))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,7 @@
+TSPLIB_NPZ
+ASYM
+br17
+ft53
+ftv64
+ft70
+rbg403

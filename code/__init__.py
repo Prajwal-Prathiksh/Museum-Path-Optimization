@@ -15,10 +15,10 @@ def print_hello_world(ext=None):
         Parameters:
         ----------
         ext: string, default=None
-            Prints an additional message. If no argument is passed, prints the 
+            Prints an additional message. If no argument is passed, prints the
             current working directoy
     '''
-    if ext == None:
+    if ext is None:
         ext = os.getcwd()
 
     print(f'Hello World! \n{ext}')
@@ -29,4 +29,3 @@ def print_hello_world(ext=None):
 ###########################################################################
 if __name__ == '__main__':
     print_hello_world()
-

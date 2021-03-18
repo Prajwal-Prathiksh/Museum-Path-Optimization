@@ -4,8 +4,14 @@ sys.path.insert(0, os.getcwd())
 
 
 class Read_opt_cost:
-    def __init__(self, path_to_opt_cost_file):
-        self.read_data = self.read_fil(path_to_opt_cost_file)
+    def __init__(self, fname):
+        keyw = 'Museum-Path-Optimization'
+        prefix = os.path.join(
+            os.getcwd().split(keyw)[0],
+            keyw,
+            'data',
+            fname)
+        self.read_data = self.read_fil(prefix)
         self.opt_cost_map = {}
         self.generate_opt_cost_map()
 

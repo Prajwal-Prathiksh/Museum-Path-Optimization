@@ -15,17 +15,28 @@ sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 ###########################################################################
 # Code
 ###########################################################################
+global OUTPUT_DIR
 OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'simulated_annealing'
 )
+if os.path.exists(OUTPUT_DIR) is False:
+    os.mkdir(OUTPUT_DIR)
+
 CFUNCS = ['simp', 'exp']
 
 
 def make_output_dir(folder_name, OUTPUT_DIR=OUTPUT_DIR):
-    output_dir = os.path.join(OUTPUT_DIR, folder_name)
-    if os.path.exists(output_dir) is False:
-        os.mkdir(output_dir)
-    return output_dir
+    if folder_name is None:
+        output_dir = os.path.join(OUTPUT_DIR, 'SSA')
+        if os.path.exists(output_dir) is False:
+            os.mkdir(output_dir)
+        return output_dir
+
+    else:
+        if os.path.exists(folder_name) is False:
+            os.mkdir(folder_name)
+            OUTPUT_DIR = folder_name
+        return folder_name
 
 
 def cli_parser():
@@ -51,7 +62,7 @@ def cli_parser():
         default=100, help='Number of iterations per epoch'
     )
     parser.add_argument(
-        '-s', action='store_true', dest='SAVE',
+        '--s', action='store_true', dest='SAVE',
         help='If true, stores any generated plots and the summary data'
     )
     parser.add_argument(
@@ -66,11 +77,15 @@ def cli_parser():
     )
     parser.add_argument(
         '--tcn', action='store', dest='tc_number', type=int,
-        default=0, help='Test case number'
+        default=1, help='Test case number'
     )
     parser.add_argument(
-        '-d', action='store', dest='output_dir', type=str,
-        default='SSA', help='Output folder name'
+        '--sym', action='store', dest='tc_sym', choices=['sym', 'asym'],
+        default='sym', help='Run symmetric or asymetric standard test cases'
+    )
+    parser.add_argument(
+        '--d', action='store', dest='output_dir', type=str,
+        default=None, help='Output folder name'
     )
 
     args = parser.parse_args()
@@ -378,6 +393,9 @@ class SimpleSimulatedAnnealing:
 
         self.len_x0 = len(x0)
 
+        # Print initial conditions
+        print(f'\nTotal Number of Epochs: {self.epochs}')
+        print(f'Initial Cost: {self.cost0}')
         # Run Algorithm
         self.xf, self.cost_hist, self.rt = self.run_algorithm(**kwargs)
         self.costf = round(self.cost_hist[-1], 3)
@@ -558,6 +576,7 @@ class SimpleSimulatedAnnealing:
 
             x0, xf = self.x0, self.xf
             cost0, costf = self.cost0, self.costf
+            cost_hist = self.cost_hist
             printing(
                 f'\nInitial Cost: {cost0} ---> Optimized Cost: {costf}'
             )
@@ -577,13 +596,13 @@ class SimpleSimulatedAnnealing:
             print(f'Log file saved at: {logname}')
 
             if save:
-                fname = os.path.join(self.output_dir, f'{ext}SSA_results.npz')
+                fname = os.path.join(self.output_dir, f'results.npz')
                 np.savez(
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
                     permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
                     reduction_in_cost=reduction_in_cost, T0=T0, alpha=alpha,
                     epochs=epochs, N_per_epochs=N_per_epochs,
-                    cooling_func=cooling_func
+                    cooling_func=cooling_func, cost_hist=cost_hist
                 )
                 print(f'\nSummary data saved at: {fname}')
         finally:
@@ -618,10 +637,8 @@ class SimpleSimulatedAnnealing:
 ###########################################################################
 if __name__ == '__main__':
     # Local import
-    from code.data_input.base_input import TestCaseLoader
-
-    # Read data off of standard library
-    loader = TestCaseLoader()
+    # from code.data_input.base_input import TestCaseLoader
+    from code.data_input.input_final import get_input_loader
 
     # Parse CLI arguments
     args = cli_parser()
@@ -637,10 +654,20 @@ if __name__ == '__main__':
 
     # Initial solution
     tc_number = args.tc_number
-    tc_name, cost_matrix = loader.get_test_data(tc_number)
+    if args.tc_sym == 'sym':
+        tc_fname = 'Choose_TC_Sym_NPZ.txt'
+    elif args.tc_sym == 'asym':
+        tc_fname = 'Choose_TC_Asym_NPZ.txt'
+
+    # Read data off of standard library
+    # loader = TestCaseLoader()
+    loader = get_input_loader(tc_fname, False)
+    tc_name = loader.get_test_case_name(tc_number)
+    cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
+
     num_nodes = np.shape(cost_matrix)[0]
-    print(f'Num of Nodes: {num_nodes}')
-    np.random.seed(0)
+    print(f'\nNum of Nodes: {num_nodes}')
+    np.random.seed()
     initial_soln = np.random.permutation(np.arange(num_nodes))
 
     # Set up Simulated Annealing Class

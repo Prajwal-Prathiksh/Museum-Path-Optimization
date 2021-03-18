@@ -1,0 +1,17 @@
+TSPLIB_NPZ
+SYM
+a280
+ali535
+att48
+att532
+bayg29
+bays29
+berlin52
+bier127
+brazil58
+brg180
+burma14
+ch130
+ch150
+eil101
+eil76
