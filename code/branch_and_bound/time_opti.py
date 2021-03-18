@@ -116,8 +116,8 @@ class Node():
             return False
 
     def debug(self):
-        print("Tour: {} | Cost = {} | Node = {} | Level = {} |".format(
-            self.tour, self.cost, self.Id, self.level), end='\r')
+        print("Tour: {} | Cost = {} | Node = {} | Level = {}".format(
+            self.tour, self.cost, self.Id, self.level))
 
 
 def CreateNode(parent_matrix, tour, level, i, j):
@@ -224,7 +224,7 @@ def solve(cost_matrix):
     while not live_nodes.empty():
         # a live node with the least estimated cost is selected
         minimum = live_nodes.get()[1]
-        minimum.debug()
+        # minimum.debug()
 
         i = minimum.Id  # `i` stores the current node number
 
@@ -331,13 +331,13 @@ def main():
     # Local import
     from code.data_input.input_final import get_input_loader
 
-    # # Read data off of standard library for symmetric
-    # loader = get_input_loader('Choose_TC_Sym_NPZ.txt', False)
-    # print("Solving symmetric problem...")
+    # Read data off of standard library for symmetric
+    loader = get_input_loader('Choose_TC_Sym_NPZ.txt', False)
+    print("Solving symmetric problem...")
 
-    # Read data off of standard library for asymmetric
-    loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
-    print("\nSolving asymmetric problem...")
+    # # Read data off of standard library for asymmetric
+    # loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
+    # print("\nSolving asymmetric problem...")
 
     # Parse command line arguments
     args = cmd_line_parser()
@@ -383,7 +383,7 @@ def main():
     COST_MATRIX = np.array(COST_MATRIX)
     N = len(COST_MATRIX)
 
-    print(COST_MATRIX)
+    # print(COST_MATRIX)
 
     # Person cannot travel from one node to the same node
     for i in range(N):
@@ -397,7 +397,7 @@ def main():
 
     print("Number of nodes are {}".format(N))
 
-    print(COST_MATRIX)
+    # print(COST_MATRIX)
 
     final_node = solve(COST_MATRIX)
     optimal_cost = final_node.cost
@@ -406,7 +406,7 @@ def main():
     if True:
         print_summary(output_dir, final_node, tc_name=tc_name, ext=ext)
     
-    print("Total cost is {}".format(optimal_cost))
+    # print("Total cost is {}".format(optimal_cost))
 
 
 if __name__ == '__main__':
