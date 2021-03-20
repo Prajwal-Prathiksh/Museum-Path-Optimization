@@ -15,18 +15,18 @@ import sys
 
 # Local import
 sys.path.insert(0, os.getcwd())
+from code.data_input.base_input import TestCaseLoader
+from code.data_input.input_final import get_input_loader
 
 #############
 # Code
 #############
-from code.data_input.input_final import get_input_loader
 
-#Symmetric Test Cases
-from code.data_input.base_input import TestCaseLoader
+# Symmetric Test Cases
 # Read data off of standard library
 loader = TestCaseLoader()
-#given values for the problems
-tc_number=0
+# given values for the problems
+tc_number = 0
 tc_name, cost_matrix = loader.get_test_data(tc_number)
 
 # Assymetric test cases
@@ -38,9 +38,9 @@ tc_name, cost_matrix = loader.get_test_data(tc_number)
 # cost_matrix = tc.get_cost_matrix()
 
 
-#loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
-#tc_numbers = [1, 2, 3, 4]
-#for tc_number in tc_numbers:
+# loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
+# tc_numbers = [1, 2, 3, 4]
+# for tc_number in tc_numbers:
 # print("\nTest case number is {}".format(tc_number))
 # tc_name = loader.get_test_case_name(tc_number)
 # cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
@@ -70,8 +70,10 @@ e = .3  # evaporation rate
 alpha = 1  # pheromone factor
 beta = 2  # visibility factor
 
-cost_best_list = [0]*4             #array that will be used in final graph for storing all cost values 
-iteration_list = [0]*4           #array that will be used in final graph for storing all iteration values
+# array that will be used in final graph for storing all cost values
+cost_best_list = [0] * 4
+# array that will be used in final graph for storing all iteration values
+iteration_list = [0] * 4
 # calculating the visibility of the next city visibility(i,j)=1/d(i,j)
 
 visibility = 1 / Cij
@@ -82,22 +84,21 @@ visibility[visibility == inf] = 0
 i = 0
 
 # intializing pheromne present at the paths to the cities
-count=0
+count = 0
 pheromne = .1 * np.ones((n, n))
-for m in [10,20,30,40]:
+for m in [10, 20, 30, 40]:
     pheromne = .1 * np.ones((n, n))
     visibility = 1 / Cij
     visibility[visibility == inf] = 0
 
-    m_iteration_list = np.empty(0)           #array that will be used in final graph for storing all iteration values
+    # array that will be used in final graph for storing all iteration values
+    m_iteration_list = np.empty(0)
     m_cost_best_list = np.empty(0)
     time_start = time.time()
     # intializing the route of the ants with size route(n_ants,n_citys+1)
     # note adding 1 because we want to come back to the source city
 
     visited = np.ones((m, n + 1))
-
-
 
     for i in range(iteration):
         # print('iteration =', i)
@@ -191,7 +192,8 @@ for m in [10,20,30,40]:
                 c = c + Cij[int(route_opt[k, j]) - 1,
                             int(route_opt[k, j + 1]) - 1]
 
-            cost[k] = c  # storing distance of tour for 'i'th ant at location 'i'
+            # storing distance of tour for 'i'th ant at location 'i'
+            cost[k] = c
 
         # finding location of minimum of dist_cost
         dist_min_loc = np.argmin(cost)
@@ -200,15 +202,18 @@ for m in [10,20,30,40]:
         # intializing current traversed as best route
         best_route = visited[dist_min_loc, :]
         pheromne = (1 - e) * pheromne  # evaporation of pheromne with (1-e)
-        cost_best_route=int(dist_min_cost[0]) + Cij[int(best_route[-2]) - 1, 0]
-        m_cost_best_list=np.append(m_cost_best_list,cost_best_route)
-        m_iteration_list=np.append(m_iteration_list,i+1)
-        #print(m_cost_best_list)
+        cost_best_route = int(
+            dist_min_cost[0]) + Cij[int(best_route[-2]) - 1, 0]
+        m_cost_best_list = np.append(m_cost_best_list, cost_best_route)
+        m_iteration_list = np.append(m_iteration_list, i + 1)
+        # print(m_cost_best_list)
         for k in range(m):
             for j in range(n - 1):
                 dt = 1 / cost[k]
                 pheromne[int(route_opt[k, j]) - 1, int(route_opt[k, j + 1]) -
-                         1] = pheromne[int(route_opt[k, j]) - 1, int(route_opt[k, j + 1]) - 1] + dt
+                         1] = pheromne[
+                             int(route_opt[k, j]) - 1,
+                             int(route_opt[k, j + 1]) - 1] + dt
                 # updating the pheromne with delta_distance
                 # delta_distance will be more with min_dist i.e adding more
                 # weight to that route  peromne
@@ -216,12 +221,12 @@ for m in [10,20,30,40]:
     time_end = time.time()
     time_taken = time_end - time_start
 
-    cost_best_list[count]=m_cost_best_list
-    iteration_list[count]=m_iteration_list
-    count+=1
-    #print(iteration_list)
+    cost_best_list[count] = m_cost_best_list
+    iteration_list[count] = m_iteration_list
+    count += 1
+    # print(iteration_list)
     print("Number of ants:", m)
-    #print('best path :', best_route)
+    # print('best path :', best_route)
     print('cost of the best path', int(
         dist_min_cost[0]) + Cij[int(best_route[-2]) - 1, 0])
     print("Time taken to solve is {} sec".format(round(time_taken, 3)))
@@ -232,5 +237,5 @@ for i in range(4):
 plt.xlabel("number of iterations")
 plt.ylabel("optimal cost")
 plt.title("Optimal Cost vs Number of iterations (varying number of ants)")
-plt.legend(["m=10","m=20","m=30","m=40"])
+plt.legend(["m=10", "m=20", "m=30", "m=40"])
 plt.show()
