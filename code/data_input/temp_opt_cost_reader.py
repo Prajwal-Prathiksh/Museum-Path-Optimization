@@ -1,6 +1,7 @@
 import __init__
 import os
 
+
 class Read_opt_cost:
     def __init__(self, fname):
         keyw = 'Museum-Path-Optimization'
@@ -21,8 +22,8 @@ class Read_opt_cost:
 
     def generate_opt_cost_map(self):
         for i in self.read_data:
-            l = i.split(' : ')
-            self.opt_cost_map[l[0]] = float(l[1].split(' ')[0][:-1])
+            temp = i.split(' : ')
+            self.opt_cost_map[temp[0]] = float(temp[1].split(' ')[0][:-1])
 
     def get_opt_cost(self, dataset_name):
         if dataset_name in self.opt_cost_map.keys():
