@@ -2,6 +2,7 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import __init__
 import os
 import numpy as np
 
@@ -68,5 +69,5 @@ class BaseTsplibFileContainer(BaseTspFileContainer):
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    #ob = XMLFileRead('a280.xml')
+    # ob = XMLFileRead('a280.xml')
     pass

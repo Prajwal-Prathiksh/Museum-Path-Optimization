@@ -5,6 +5,7 @@
   - [Description](#description)
     - [Data Input](#data-input)
     - [Branch and Bound](#branch-and-bound)
+    - [Ant Colony Optimization](#ant-colony-optimization)
     - [Simulated Annealing](#simulated-annealing)
   - [Project Tree](#project-tree)
 
@@ -36,6 +37,12 @@ $ python code/branch_and_bound/time_opti.py
 Run the following to get all the command-line arguments:
 ```
 $ python code/branch_and_bound/time_opti.py -h
+```
+
+### Ant Colony Optimization
+To run the ant colony optimization algorithm, do the following from root:
+```
+$ python code\ant_colony\ant_colony_code.py
 ```
 
 ### Simulated Annealing

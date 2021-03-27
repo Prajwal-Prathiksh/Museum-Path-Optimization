@@ -7,8 +7,8 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import __init__
 import os
-import sys
 import copy
 import time
 import argparse
@@ -16,15 +16,19 @@ import numpy as np
 from datetime import datetime
 from queue import PriorityQueue
 
+# Local imports
+from code.data_input.input_final import get_input_loader
 
-sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
 
 ###########################################################################
 # Code
 ###########################################################################
+global OUTPUT_DIR
 OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'branch_and_bound'
 )
+if os.path.exists(OUTPUT_DIR) is False:
+    os.mkdir(OUTPUT_DIR)
 
 INF = np.infty
 N = 5  # Number of exhibits
@@ -328,9 +332,6 @@ def print_summary(output_dir, node, tc_name=None, ext=''):
 
 
 def main():
-    # Local import
-    from code.data_input.input_final import get_input_loader
-
     # Read data off of standard library for symmetric
     loader = get_input_loader('Choose_TC_Sym_NPZ.txt', False)
     print("Solving symmetric problem...")

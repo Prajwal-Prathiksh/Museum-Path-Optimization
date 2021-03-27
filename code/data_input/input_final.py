@@ -2,17 +2,16 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import __init__
 import os
-import numpy as np
-import sys
 
-sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
+from code.data_input.file_reader import TxtFileRead
+from code.data_input.bass_input import BaseInputLoader
+
 
 ###########################################################################
 # Code
 ###########################################################################
-from code.data_input.file_reader import TxtFileRead
-from code.data_input.bass_input import BaseInputLoader
 
 
 class GenInternalParams(TxtFileRead):

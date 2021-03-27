@@ -2,15 +2,16 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import __init__
 import argparse
 from datetime import datetime
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import sys
 
-sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
+# Local imports
+from code.data_input.input_final import get_input_loader
 
 ###########################################################################
 # Code
@@ -636,10 +637,6 @@ class SimpleSimulatedAnnealing:
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    # Local import
-    # from code.data_input.base_input import TestCaseLoader
-    from code.data_input.input_final import get_input_loader
-
     # Parse CLI arguments
     args = cli_parser()
 
