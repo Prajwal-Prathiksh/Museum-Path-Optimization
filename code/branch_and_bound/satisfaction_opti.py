@@ -7,8 +7,8 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import __init__
 import os
-import sys
 import copy
 import time
 import argparse
@@ -16,16 +16,19 @@ import numpy as np
 from datetime import datetime
 from queue import PriorityQueue
 
-
-sys.path.insert(0, os.getcwd())  # Insert this when you have any local imports
+# Local import
+from code.data_input.base_input import TestCaseLoader
 
 ###########################################################################
 # Code
 ###########################################################################
+global OUTPUT_DIR
 OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'branch_and_bound'
 )
-
+if os.path.exists(OUTPUT_DIR) is False:
+    os.mkdir(OUTPUT_DIR)
+    
 INF = np.infty
 N = 5  # Number of exhibits
 
@@ -347,9 +350,6 @@ def print_summary(output_dir, node, stamina, tc_name=None, ext=''):
 
 
 def main():
-    # Local import
-    from code.data_input.base_input import TestCaseLoader
-
     # Read data off of standard library
     loader = TestCaseLoader()
 

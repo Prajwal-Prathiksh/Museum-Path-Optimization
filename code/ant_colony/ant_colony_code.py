@@ -4,46 +4,32 @@
 # Imports
 #############
 # Standard library imports
+import __init__ 
 from numpy import inf
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
-from datetime import datetime
 import time
-import os
-import sys
 
 # Local import
-sys.path.insert(0, os.getcwd())
-from code.data_input.base_input import TestCaseLoader
 from code.data_input.input_final import get_input_loader
 
 #############
 # Code
 #############
 
-# Symmetric Test Cases
-# Read data off of standard library
-loader = TestCaseLoader()
-# given values for the problems
-tc_number = 0
-tc_name, cost_matrix = loader.get_test_data(tc_number)
-
-# Assymetric test cases
-# from code.data_input.input_final import get_input_loader
-# loader = get_input_loader('ChooseTC_Asym_XML', False)
-# tc_number=5
-# tc = loader.get_input_test_case(tc_number)
-# tc_name = loader.get_test_case_name(tc_number)
-# cost_matrix = tc.get_cost_matrix()
+# Write 'sym' for symmetric cases and 'asym' for asymmetric cases
+tc_sym = 'sym' 
+tc_number = 1
 
 
-# loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
-# tc_numbers = [1, 2, 3, 4]
-# for tc_number in tc_numbers:
-# print("\nTest case number is {}".format(tc_number))
-# tc_name = loader.get_test_case_name(tc_number)
-# cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
+if tc_sym == 'sym':
+    tc_fname = 'Choose_TC_Sym_NPZ.txt'
+elif tc_sym == 'asym':
+    tc_fname = 'Choose_TC_Asym_NPZ.txt'
+
+loader = get_input_loader(tc_fname, False)
+tc_name = loader.get_test_case_name(tc_number)
+cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
 
 print('tc_name=', tc_name)
 Cij = cost_matrix

@@ -2,7 +2,7 @@
 # Imports
 ###########################################################################
 # Standard library imports
-import __init__ 
+import __init__
 import argparse
 from datetime import datetime
 import time
@@ -637,10 +637,6 @@ class SimpleSimulatedAnnealing:
 # Main Code
 ###########################################################################
 if __name__ == '__main__':
-    # Local import
-    # from code.data_input.base_input import TestCaseLoader
-    
-
     # Parse CLI arguments
     args = cli_parser()
 
