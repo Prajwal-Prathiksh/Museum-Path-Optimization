@@ -2,6 +2,7 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import __init__
 import os
 import numpy as np
 

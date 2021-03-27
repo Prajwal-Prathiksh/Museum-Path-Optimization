@@ -28,7 +28,7 @@ OUTPUT_DIR = os.path.join(
 )
 if os.path.exists(OUTPUT_DIR) is False:
     os.mkdir(OUTPUT_DIR)
-    
+
 INF = np.infty
 N = 5  # Number of exhibits
 
@@ -426,7 +426,9 @@ def main():
                 COST_MATRIX[i][j] = INF
 
     # Relation between travel penalty and popularity
-    STAMINA = stamina  # higher the stamina, lower is the weightage of travel penalty
+
+    # higher the stamina, lower is the weightage of travel penalty
+    STAMINA = stamina
 
     for i in range(N):
         for j in range(N):
@@ -438,7 +440,8 @@ def main():
     optimal_cost = final_node.cost
 
     # print_tour(final_node)
-    # print("\nThe penalty incurred is {} for stamina {}".format(optimal_cost, stamina))
+    # print("\nThe penalty incurred is {} for stamina {}".format(
+    # optimal_cost, stamina))
 
     if True:
         print_summary(output_dir, final_node, stamina,

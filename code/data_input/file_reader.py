@@ -2,7 +2,7 @@
 # Imports
 ###########################################################################
 # Standard library imports
-import os
+import __init__
 from xml.dom import minidom
 import numpy as np
 

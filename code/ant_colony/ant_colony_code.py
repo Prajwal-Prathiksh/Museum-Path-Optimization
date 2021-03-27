@@ -4,7 +4,7 @@
 # Imports
 #############
 # Standard library imports
-import __init__ 
+import __init__
 from numpy import inf
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,7 +18,7 @@ from code.data_input.input_final import get_input_loader
 #############
 
 # Write 'sym' for symmetric cases and 'asym' for asymmetric cases
-tc_sym = 'sym' 
+tc_sym = 'sym'
 tc_number = 1
 
 

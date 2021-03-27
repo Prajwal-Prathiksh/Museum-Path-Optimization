@@ -2,10 +2,13 @@
 # Imports
 ###########################################################################
 # Standard library imports
+import __init__
 import os
 import numpy as np
 
-from input_final import get_input_loader
+from code.data_input.input_final import get_input_loader
+
+
 ###########################################################################
 # Code
 ###########################################################################

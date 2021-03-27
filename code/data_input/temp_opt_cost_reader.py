@@ -1,7 +1,5 @@
+import __init__
 import os
-import sys
-sys.path.insert(0, os.getcwd())
-
 
 class Read_opt_cost:
     def __init__(self, fname):
