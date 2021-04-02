@@ -25,9 +25,9 @@ class GenInternalParams(TxtFileRead):
         TxtFileRead.__init__(self, param_file_path)
 
     def process_file_data(self):
-        file_type = self.file_data[0][:-1]
-        ds_type = self.file_data[1][:-1]
-        names = [i[:-1] for i in self.file_data[2:]]
+        file_type = self.file_data[0]
+        ds_type = self.file_data[1]
+        names = [i for i in self.file_data[2:]]
         # Might have to change
         keyw = 'Museum-Path-Optimization'
         pefix = os.path.join(os.getcwd().split(keyw)[0], keyw)
@@ -88,4 +88,4 @@ if __name__ == '__main__':
     bl = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
     print(bl.get_input_test_cases())
     print(bl.get_input_test_case(1))
-    print(bl.get_input_test_case(1).get_cost_matrix())
+    #print(bl.get_input_test_case(1).get_cost_matrix())

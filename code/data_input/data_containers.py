@@ -84,9 +84,10 @@ class TsplibOptDataContainer(BaseOptimalDataContainer, TxtFileRead):
         TxtFileRead.__init__(self, file_path)
 
     def process_file_data(self):
+        print(self.file_data)
         # Might have to change
         self.dataset_name = self.file_path.split('.')[0].split('/')[-1]
         ###
         self.optimal_route_data['cost'] = float(self.file_data[-1])
-        opt_r = [i[:-1] for i in self.file_data[6:-2]]
+        opt_r = [i for i in self.file_data[6:-2]]
         self.optimal_route_data['route'] = opt_r
