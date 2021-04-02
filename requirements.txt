@@ -1,5 +1,0 @@
-copy
-numpy
-matplotlib
-queue.PriorityQueue
-https://github.com/pypr/automan/zipball/master
