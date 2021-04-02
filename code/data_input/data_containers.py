@@ -85,7 +85,8 @@ class TsplibTxtFileContainer(BaseTsplibFileContainer, TxtFileRead):
 
     def process_file_data(self):
         rf_dict = self.create_reference_dict()
-        temp = [[q.strip() for q in p] for p in [i.split(':') for i in self.file_data]]
+        temp = [[q.strip() for q in p] for p in [i.split(':')
+                                                 for i in self.file_data]]
         flag = 0
         for line in temp:
             if len(line) == 2 and line[0] in rf_dict.keys():
@@ -97,17 +98,18 @@ class TsplibTxtFileContainer(BaseTsplibFileContainer, TxtFileRead):
                 rf_dict[line[0]] = []
         rf_dict['NODE_COORD_SECTION'] = rf_dict['NODE_COORD_SECTION'][:-1]
         if rf_dict['EDGE_WEIGHT_TYPE'] == 'EUC_2D':
-            coords = {i[0]:[float(i[1]),float(i[2])] for i in [j.split() for j in rf_dict['NODE_COORD_SECTION']]}
+            coords = {i[0]: [float(i[1]), float(i[2])] for i in [
+                j.split() for j in rf_dict['NODE_COORD_SECTION']]}
             self.additional_data_container['coords'] = coords
-            #print(self.additional_data_container['coords'])
+            # print(self.additional_data_container['coords'])
 
     def create_reference_dict(self):
         D = {}
-        keys = ['NAME', 'COMMENT', 'TYPE', 'DIMENSION', 'EDGE_WEIGHT_TYPE', 'NODE_COORD_SECTION']
+        keys = ['NAME', 'COMMENT', 'TYPE', 'DIMENSION',
+                'EDGE_WEIGHT_TYPE', 'NODE_COORD_SECTION']
         for k in keys:
             D[k] = None
         return D
-
 
 
 class TsplibOptDataContainer(BaseOptimalDataContainer, TxtFileRead):
@@ -116,13 +118,14 @@ class TsplibOptDataContainer(BaseOptimalDataContainer, TxtFileRead):
         TxtFileRead.__init__(self, file_path)
 
     def process_file_data(self):
-        #print(self.file_data)
+        # print(self.file_data)
         # Might have to change
         self.dataset_name = self.file_path.split('.')[0].split('/')[-1]
         ###
         self.optimal_route_data['cost'] = float(self.file_data[-1])
         opt_r = [i for i in self.file_data[6:-2]]
         self.optimal_route_data['route'] = opt_r
+
 
 ###########################################################################
 # Main Code

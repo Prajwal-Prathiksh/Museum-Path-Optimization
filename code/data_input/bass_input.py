@@ -33,7 +33,7 @@ class BaseInputData:
             self.constraint_data = dict(file_read_cont.get_constraint_data())
         if opt_file_cont is not None:
             self.optimal_data = dict(opt_file_cont.get_opt_data())
-        #print(add_file_cont)
+        # print(add_file_cont)
         if add_file_cont is not None:
             self.additioanl_data = dict(add_file_cont.get_additional_data())
 
@@ -61,7 +61,8 @@ class BaseInputData:
 
 class TSPLIBBaseInput(BaseInputData):
     def __init__(self, file_read_cont, opt_file_cont, add_file_cont):
-        BaseInputData.__init__(self, file_read_cont, opt_file_cont, add_file_cont)
+        BaseInputData.__init__(self, file_read_cont,
+                               opt_file_cont, add_file_cont)
 
     def get_cost_matrix(self):
         return self.cost_data['cost_matrix']
@@ -104,9 +105,9 @@ class BaseInputLoader:
                 TsplibNpzFileContainer,
                 TSPLIBBaseInput,
                 TsplibOptDataContainer]}
-        self.file_reader_lists_dict = {'tc' : [], 'opt' : [], 'addnl' : []}
+        self.file_reader_lists_dict = {'tc': [], 'opt': [], 'addnl': []}
         self.input_test_cases = {}
-        self.reqs = {'tc' : False, 'opt' : False, 'addnl' : False}
+        self.reqs = {'tc': False, 'opt': False, 'addnl': False}
         if tc_load_list_path is not None:
             self.read_tc_paths(tc_load_list_path)
             self.reqs['tc'] = True
@@ -140,8 +141,10 @@ class BaseInputLoader:
         self.update_file_type(file_type)
         for path in read_paths:
             self.file_reader_lists_dict['tc'].append(self.file_read_type(path))
-        self.file_reader_lists_dict['opt'] = [None for i in self.file_reader_lists_dict['tc']]
-        self.file_reader_lists_dict['addnl'] = [None for i in self.file_reader_lists_dict['tc']]
+        self.file_reader_lists_dict['opt'] = [
+            None for i in self.file_reader_lists_dict['tc']]
+        self.file_reader_lists_dict['addnl'] = [
+            None for i in self.file_reader_lists_dict['tc']]
 
     def read_opt_paths(self, opt_load_list_path):
         rdr = TxtFileRead(opt_load_list_path)
@@ -152,8 +155,10 @@ class BaseInputLoader:
             self.file_reader_lists_dict['opt'].append(
                 self.opt_file_read_type(path))
         if self.file_reader_lists_dict['tc'] == []:
-            self.file_reader_lists_dict['tc'] = [None for i in self.file_reader_lists_dict['opt']]
-        self.file_reader_lists_dict['addnl'] = [None for i in self.file_reader_lists_dict['opt']]
+            self.file_reader_lists_dict['tc'] = [
+                None for i in self.file_reader_lists_dict['opt']]
+        self.file_reader_lists_dict['addnl'] = [
+            None for i in self.file_reader_lists_dict['opt']]
 
     def read_addnl_paths(self, load_list_path):
         rdr = TxtFileRead(load_list_path)
@@ -164,9 +169,11 @@ class BaseInputLoader:
             self.file_reader_lists_dict['addnl'].append(
                 self.addnl_file_read_type(path))
         if self.file_reader_lists_dict['tc'] == []:
-            self.file_reader_lists_dict['tc'] = [None for i in self.file_reader_lists_dict['addnl']]
+            self.file_reader_lists_dict['tc'] = [
+                None for i in self.file_reader_lists_dict['addnl']]
         if self.file_reader_lists_dict['opt'] == []:
-            self.file_reader_lists_dict['opt'] = [None for i in self.file_reader_lists_dict['addnl']]
+            self.file_reader_lists_dict['opt'] = [
+                None for i in self.file_reader_lists_dict['addnl']]
 
     def generate_input_test_cases(self):
         # Hopefully Temp stuff
@@ -194,10 +201,9 @@ class BaseInputLoader:
 
         for i in range(len(self.file_reader_lists_dict['tc'])):
             self.input_test_cases['TEST_CASE_' + str(i + 1)] = \
-                    self.input_class(self.file_reader_lists_dict['tc'][i],
-                                     self.file_reader_lists_dict['opt'][i],
-                                     self.file_reader_lists_dict['addnl'][i])
-
+                self.input_class(self.file_reader_lists_dict['tc'][i],
+                                 self.file_reader_lists_dict['opt'][i],
+                                 self.file_reader_lists_dict['addnl'][i])
 
     def get_input_test_cases(self):
         return self.input_test_cases
