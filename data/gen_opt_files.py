@@ -11,7 +11,7 @@ prefix = os.path.join(
 
 L = sorted(os.listdir(prefix))
 L = [i.split('.')[0] for i in L]
-print(L)
+#print(L)
 
 prefix = os.path.join(
     os.getcwd().split(keyw)[0],
@@ -31,10 +31,11 @@ f = open(prefix2, 'r')
 data = f.readlines()
 f.close()
 datL = {i.split()[0]:i.split()[-1] for i in data}
-print(datL)
+#print(datL)
 
-for i in L:
+for i in datL.keys():
     path = os.path.join(prefix, i.split('.')[0] + '.opt.tour.txt')
+    print(path)
     f = open(path, 'w')
     f.write('NAME : ' + i + '\n')
     f.write('COMMENT : ' + '\n')
