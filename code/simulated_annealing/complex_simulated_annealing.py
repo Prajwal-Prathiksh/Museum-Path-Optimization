@@ -747,6 +747,28 @@ class ComplexSimulatedAnnealing:
             else:
                 loc_bar -= 1
         return loc_bar
+    @staticmethod
+    def consecutive_swap(x,loc_bar):
+        '''
+            Swaps two consecutive elements of array which are being visited
+
+            Parameters:
+            -----------
+            x: (List)
+                List of Indices
+            loc_bar: (int)
+                Location of bar, Indicating the number of exhibits being
+                visited
+            Returns:
+            --------
+            Swapped solution
+        '''
+        i = np.random.randint(low=0, high=(loc_bar-1),)
+        x0 = x.copy()
+        temp = x0[i]
+        x0[i] = x0[i+1]
+        x0[i+1] = temp
+        return x0
 
     def run_algorithm(self):
         '''
