@@ -26,6 +26,9 @@ class FileReadContainer:
     def process_file_data(self):
         pass
 
+    def get_file_data(self):
+        return self.file_data
+
 
 class XMLFileRead(FileReadContainer):
     def __init__(self, file_path=None):
@@ -54,7 +57,7 @@ class TxtFileRead(FileReadContainer):
             if self.file_data[i][-1] == '\n':
                 self.file_data[i] = self.file_data[i][:-1] 
         f.close()
-        print(self.file_data)
+        #print(self.file_data)
 
 
 ###########################################################################
