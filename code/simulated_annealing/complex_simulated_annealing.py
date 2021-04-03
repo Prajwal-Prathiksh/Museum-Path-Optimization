@@ -318,7 +318,7 @@ class Coordinate:
             satisfaction += S[i]
 
         return satisfaction - \
-            lamda*Coordinate.time_taken(x, coords, velocity)
+            lamda * Coordinate.time_taken(x, coords, velocity)
 
     @staticmethod
     @function_calls
