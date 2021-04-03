@@ -18,14 +18,14 @@ prefix = os.path.join(
     keyw,
     'data',
     'TSPLIB',
-    'Symmetric',
+    'Asymmetric',
     'Opt')
 
 prefix2 = os.path.join(
     os.getcwd().split(keyw)[0],
     keyw,
     'data',
-    'Sym_TSPLIB_opt_costs.txt')
+    'Asym_TSPLIB_opt_costs.txt')
 
 f = open(prefix2, 'r')
 data = f.readlines()
