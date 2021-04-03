@@ -18,7 +18,8 @@ from code.data_input.file_reader import TxtFileRead
 
 
 class BaseInputData:
-    def __init__(self, file_read_cont=None, opt_file_cont=None, add_file_cont=None):
+    def __init__(self, file_read_cont=None, opt_file_cont=None,
+                 add_file_cont=None):
         self.dataset_name = ''
         self.cost_data = {}
         self.constraint_data = {}
@@ -85,7 +86,8 @@ class BaseInputLoader:
             lines should be paths to test cases
     '''
 
-    def __init__(self, tc_load_list_path=None, opt_load_list_path=None, addnl_load_list_path=None):
+    def __init__(self, tc_load_list_path=None, opt_load_list_path=None,
+                 addnl_load_list_path=None):
         self.OUTPUT_DIR = os.path.join(os.getcwd(), 'data')
 
         self.input_class = BaseInputData
@@ -119,7 +121,8 @@ class BaseInputLoader:
             if addnl_load_list_path != tc_load_list_path:
                 self.read_addnl_paths(addnl_load_list_path)
             else:
-                self.file_reader_lists_dict['addnl'] = self.file_reader_lists_dict['tc']
+                self.file_reader_lists_dict['addnl'] =
+                self.file_reader_lists_dict['tc']
 
         self.generate_input_test_cases()
 

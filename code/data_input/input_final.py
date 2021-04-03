@@ -74,7 +74,8 @@ def write_to_file(fpath, lines):
     f.close()
 
 
-def get_input_loader(param_file_name, load_opt_solns=False, load_addnl_data=False):
+def get_input_loader(param_file_name, load_opt_solns=False,
+                     load_addnl_data=False):
     keyw = 'Museum-Path-Optimization'
     prefix = os.path.join(os.getcwd().split(keyw)[0], keyw, 'code',
                           'data_input', 'params', param_file_name)

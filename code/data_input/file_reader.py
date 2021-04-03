@@ -55,9 +55,9 @@ class TxtFileRead(FileReadContainer):
         self.file_data = f.readlines()
         for i in range(len(self.file_data)):
             if self.file_data[i][-1] == '\n':
-                self.file_data[i] = self.file_data[i][:-1] 
+                self.file_data[i] = self.file_data[i][:-1]
         f.close()
-        #print(self.file_data)
+        # print(self.file_data)
 
 
 ###########################################################################
