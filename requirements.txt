@@ -1,5 +1,6 @@
 copy
 numpy
+numba
 matplotlib
 queue.PriorityQueue
 https://github.com/pypr/automan/zipball/master
