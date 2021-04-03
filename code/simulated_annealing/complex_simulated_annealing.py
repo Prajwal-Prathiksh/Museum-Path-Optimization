@@ -287,6 +287,7 @@ class Coordinate:
         return initial_coords, initial_solution, S, loc_bar
 
     @staticmethod
+    @njit
     @function_calls
     def satisfaction(data):
         '''
@@ -315,8 +316,9 @@ class Coordinate:
         satisfaction = 0
         for i in x:
             satisfaction += S[i]
-        return satisfaction - lamda * \
-            Coordinate.time_taken(x, coords, velocity)
+
+        return satisfaction - \
+            lamda*Coordinate.time_taken(x, coords, velocity)
 
     @staticmethod
     @function_calls
@@ -606,7 +608,8 @@ class ComplexSimulatedAnnealing:
 
         # Cooling function
         self.cooling_funcs_dict = dict(
-            simp=self.simple_cooling_func, exp=self.exponential_cooling_func
+            simp=ComplexSimulatedAnnealing.simple_cooling_func,
+            exp=ComplexSimulatedAnnealing.exponential_cooling_func
         )
         self.cooling_func = self.cooling_funcs_dict[cooling_func]
 
@@ -624,7 +627,9 @@ class ComplexSimulatedAnnealing:
         self.func0_calls = self.func0.calls
         self.check_constraints_calls = self.check_constraints.calls
 
-    def simple_cooling_func(self, T, epoch_num):
+    @staticmethod
+    @njit
+    def simple_cooling_func(T, alpha, epoch_num):
         '''
             A simple cooling function.
 
@@ -640,10 +645,12 @@ class ComplexSimulatedAnnealing:
             T_cooled: (float)
                 Cooled temperature
         '''
-        T_cooled = T * self.alpha
+        T_cooled = T * alpha
         return T_cooled
 
-    def exponential_cooling_func(self, T, epoch_num):
+    @staticmethod
+    @njit
+    def exponential_cooling_func(T, alpha, epoch_num):
         '''
             A simple cooling function.
 
@@ -659,7 +666,7 @@ class ComplexSimulatedAnnealing:
             T_cooled: (float)
                 Cooled temperature
         '''
-        T_cooled = T * np.math.exp(-self.alpha * epoch_num)
+        T_cooled = T * np.math.exp(-alpha * epoch_num)
         return T_cooled
 
     def plot_cost_hist(self, save=True):
@@ -696,6 +703,7 @@ class ComplexSimulatedAnnealing:
         plt.close()
 
     @staticmethod
+    # @njit
     def apply_swap(x, loc_bar):
         '''
             Swaps two elements of array which are being visited
@@ -721,6 +729,7 @@ class ComplexSimulatedAnnealing:
         return x0
 
     @staticmethod
+    # @njit
     def apply_shake(x, loc_bar):
         '''
             Swaps two elements of array one being visited, one not being
@@ -749,7 +758,8 @@ class ComplexSimulatedAnnealing:
         return x0
 
     @staticmethod
-    def modify_nodes(x, loc_bar, k):
+    @njit
+    def modify_nodes(N, loc_bar, k):
         '''
             Increases or decreases the exhibits visited
 
@@ -768,7 +778,7 @@ class ComplexSimulatedAnnealing:
         '''
         if(loc_bar == 1):
             loc_bar += 1
-        elif(loc_bar == len(x)):
+        elif(loc_bar == N):
             loc_bar -= 1
         else:
             if(np.random.random() < k):
@@ -852,10 +862,10 @@ class ComplexSimulatedAnnealing:
                 f't_max = {T_max} | Constraints: {tmp_constr}'
             print(msg, end='\r')
 
-            T = self.cooling_func(T, epoch)
+            T = self.cooling_func(T, self.alpha, epoch)
 
             for iterator in range(self.N_per_epochs):
-                loc_bar_new = modify_nodes(x, loc_bar, k)
+                loc_bar_new = modify_nodes(len(x), loc_bar, k)
                 x_new = apply_shake(x, loc_bar_new)
                 cost_new = self.func0(
                     [x_new[:loc_bar_new], S, coords, velocity])
