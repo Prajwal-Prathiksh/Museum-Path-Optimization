@@ -187,10 +187,14 @@ class Coordinate:
         dist = 0.0
         for first, second in zip(coords[:-1], coords[1:]):
             # Distance between successive exhibits are added
-            dist += Coordinate.get_distance(first.x, first.y, second.x, second.y)
+            dist += Coordinate.get_distance(
+                first.x, first.y, second.x, second.y
+            )
 
         # Distance between the first and the last exhibits is added
-        dist += Coordinate.get_distance(coords[0].x, coords[0].y, coords[-1].x, coords[-1].y)
+        dist += Coordinate.get_distance(
+            coords[0].x, coords[0].y, coords[-1].x, coords[-1].y
+        )
         return dist
 
     @staticmethod
@@ -311,7 +315,8 @@ class Coordinate:
         satisfaction = 0
         for i in x:
             satisfaction += S[i]
-        return satisfaction - lamda*Coordinate.time_taken(x, coords, velocity)
+        return satisfaction - lamda * \
+            Coordinate.time_taken(x, coords, velocity)
 
     @staticmethod
     @function_calls
@@ -336,13 +341,13 @@ class Coordinate:
         for i in range(0, len(x) - 1, 1):
             # Distance between successive exhibits are added
             dist += Coordinate.get_distance(
-                coords[x[i]].x, coords[x[i]].y, 
+                coords[x[i]].x, coords[x[i]].y,
                 coords[x[(i + 1)]].x, coords[x[(i + 1)]].y
             )
 
         # Distance between the first and the last exhibits is added
         dist += Coordinate.get_distance(
-            coords[x[0]].x, coords[x[0]].y, 
+            coords[x[0]].x, coords[x[0]].y,
             coords[x[-1]].x, coords[x[-1]].y
         )
         return (dist / velocity)
@@ -459,7 +464,9 @@ class Coordinate:
             func0([initial_solution[:loc_bar], S, initial_coords, velocity]), 2
         )
         new_cost = round(
-            func0([final_solution[:final_loc_bar], S, initial_coords, velocity]), 2
+            func0(
+                [final_solution[:final_loc_bar], S, initial_coords, velocity]
+            ), 2
         )
 
         ax1.title.set_text(f'Initial Solution | Cost = {old_cost}')
@@ -771,7 +778,7 @@ class ComplexSimulatedAnnealing:
         return loc_bar
 
     @staticmethod
-    def consecutive_swap(x,loc_bar):
+    def consecutive_swap(x, loc_bar):
         '''
             Swaps two consecutive elements of array which are being visited
 
@@ -786,11 +793,11 @@ class ComplexSimulatedAnnealing:
             --------
             Swapped solution
         '''
-        i = np.random.randint(low=0, high=(loc_bar-1),)
+        i = np.random.randint(low=0, high=(loc_bar - 1),)
         x0 = x.copy()
         temp = x0[i]
-        x0[i] = x0[i+1]
-        x0[i+1] = temp
+        x0[i] = x0[i + 1]
+        x0[i + 1] = temp
         return x0
 
     def run_algorithm(self):
@@ -850,7 +857,8 @@ class ComplexSimulatedAnnealing:
             for iterator in range(self.N_per_epochs):
                 loc_bar_new = modify_nodes(x, loc_bar, k)
                 x_new = apply_shake(x, loc_bar_new)
-                cost_new = self.func0([x_new[:loc_bar_new], S, coords, velocity])
+                cost_new = self.func0(
+                    [x_new[:loc_bar_new], S, coords, velocity])
 
                 if(
                     self.check_constraints(
@@ -1054,15 +1062,15 @@ if __name__ == '__main__':
     optim_solution.solver_summary(save=SAVE)
     optim_solution.plot_cost_hist(save=SAVE)
     Coordinate.plot_solution(
-        func0=func0, 
-        initial_coords=initial_coords, 
-        initial_solution=initial_solution, 
-        loc_bar=loc_bar, 
+        func0=func0,
+        initial_coords=initial_coords,
+        initial_solution=initial_solution,
+        loc_bar=loc_bar,
         final_solution=optim_solution.xf,
         final_loc_bar=optim_solution.final_loc_bar,
-        S=S, 
+        S=S,
         velocity=velocity,
-        ext=ext, 
+        ext=ext,
         save=SAVE,
         output_dir=output_dir
     )
