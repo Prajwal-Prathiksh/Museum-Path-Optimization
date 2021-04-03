@@ -15,7 +15,7 @@ from numba import njit
 ###########################################################################
 # Code
 ###########################################################################
-global OUTPUT_DIR
+global OUTPUT_DIR, LAMBDA
 OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'simulated_annealing'
 )
@@ -68,6 +68,10 @@ def cli_parser():
     parser.add_argument(
         '--alpha', action='store', dest='alpha', type=float,
         default=0.99, help='Cooling factor'
+    )
+    parser.add_argument(
+        '--lambda', action='store', dest='LAMBDA', type=float,
+        default=0.5, help='Penalty coefficient for inequality constraints'
     )
     parser.add_argument(
         '--epoch', action='store', dest='epochs', type=int,
@@ -311,14 +315,14 @@ class Coordinate:
 
     @staticmethod
     @function_calls
-    def satisfaction_with_time_penalty(data, lamda=0.5):
+    def satisfaction_with_time_penalty(data):
         x, S, coords, velocity = data[0], data[1], data[2], data[3]
         satisfaction = 0
         for i in x:
             satisfaction += S[i]
 
         return satisfaction - \
-            lamda * Coordinate.time_taken(x, coords, velocity)
+            LAMBDA * Coordinate.time_taken(x, coords, velocity)
 
     @staticmethod
     @function_calls
@@ -616,12 +620,12 @@ class ComplexSimulatedAnnealing:
         self.len_x0 = len(x0)
 
         # Run Algorithm
-        self.xf, self.final_loc_bar, self.cost_hist, self.rt = \
-            self.run_algorithm(**kwargs)
-        self.costf = round(self.cost_hist[-1], 3)
+        self.final_x, self.final_loc_bar, self.cost_hist, self.rt = \
+            self.run_algorithm()
+        self.final_cost = round(self.cost_hist[-1], 3)
 
         self.increase_in_cost = round(
-            np.abs(1 - self.cost0 / self.costf) * 100, 3
+            np.abs(1 - self.cost0 / self.final_cost) * 100, 3
         )
 
         self.func0_calls = self.func0.calls
@@ -957,13 +961,25 @@ class ComplexSimulatedAnnealing:
             permut = ComplexSimulatedAnnealing.num_permutations_approx(x0_len)
             printing(f'Total number of permutations: {permut}')
 
-            x0, xf = self.x0, self.xf
-            cost0, costf = self.cost0, self.costf
+            x0, final_x = self.x0, self.final_x
+            cost0, final_cost = self.cost0, self.final_cost
             printing(
-                f'\nInitial Cost: {cost0} ---> Optimized Cost: {costf}'
+                f'\nInitial Cost: {cost0} ---> Optimized Cost: {final_cost}'
             )
             increase_in_cost = self.increase_in_cost
             printing(f'Increase in cost (in %): {increase_in_cost} %')
+
+            coords, final_loc_bar = self.coords, self.final_loc_bar
+            time_taken = Coordinate.time_taken
+            final_t = round(
+                time_taken(final_x[:final_loc_bar], coords, velocity), 1
+            )
+            final_sl = 0
+            for i in final_x:
+                final_sl += self.S[i]
+            printing(f'\nNode visited in optimized solution: {final_loc_bar}')
+            printing(f'Travel time of optimized solution: {final_t}')
+            printing(f'Satisfaction level of optimized solution: {final_sl}')
 
             T0, alpha, delta, k = self.T0, self.alpha, self.delta, self.k
             epochs = self.epochs
@@ -974,6 +990,7 @@ class ComplexSimulatedAnnealing:
             printing(f'delta = {delta} | k = {k}')
             printing(f'epochs = {epochs} | iter/epoch = {N_per_epochs}')
             printing(f'Velocity = {vel} | T_max = {T_max}')
+            printing(f'Lambda value: {LAMBDA}')
             printing(f'Cooling Function: {cooling_func}()')
 
             printing('\n===================================================\n')
@@ -984,9 +1001,11 @@ class ComplexSimulatedAnnealing:
                 fname = os.path.join(self.output_dir, f'results.npz')
                 np.savez(
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
-                    permut=permut, x0=x0, cost0=cost0, xf=xf, costf=costf,
-                    increase_in_cost=increase_in_cost, T0=T0, alpha=alpha,
-                    delta=delta, epochs=epochs, N_per_epochs=N_per_epochs,
+                    permut=permut, x0=x0, cost0=cost0, final_x=final_x, 
+                    final_cost=final_cost, final_loc_bar=final_loc_bar, 
+                    final_t=final_t, final_sl=final_sl, LAMBDA=LAMBDA,
+                    increase_in_cost=increase_in_cost, T0=T0, alpha=alpha, 
+                    delta=delta, epochs=epochs, N_per_epochs=N_per_epochs, 
                     cooling_func=cooling_func, vel=vel, T_max=T_max,
                     cost_hist=self.cost_hist
                 )
@@ -1035,6 +1054,7 @@ if __name__ == '__main__':
     # Generate random coordinates, initial solution that satifies constraints
     n = args.n
     velocity, T_max, delta, k = args.vel, args.T_max, args.delta, args.k
+    LAMBDA = args.LAMBDA
 
     feasible_solution = Coordinate.get_feasible_solution(
         n, velocity, T_max, seed=1, low=0, high=11
@@ -1076,7 +1096,7 @@ if __name__ == '__main__':
         initial_coords=initial_coords,
         initial_solution=initial_solution,
         loc_bar=loc_bar,
-        final_solution=optim_solution.xf,
+        final_solution=optim_solution.final_x,
         final_loc_bar=optim_solution.final_loc_bar,
         S=S,
         velocity=velocity,
@@ -1084,3 +1104,5 @@ if __name__ == '__main__':
         save=SAVE,
         output_dir=output_dir
     )
+
+    print('\n===================================================\n')
