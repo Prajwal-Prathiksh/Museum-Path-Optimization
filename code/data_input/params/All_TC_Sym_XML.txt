@@ -13,5 +13,11 @@ brg180
 burma14
 ch130
 ch150
+d198
 eil101
 eil76
+kroA100
+kroB150
+lin318
+pr76
+st70

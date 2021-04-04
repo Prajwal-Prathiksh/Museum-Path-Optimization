@@ -6,7 +6,7 @@ prefix = os.path.join(
     keyw,
     'data',
     'TSPLIB',
-    'Asymmetric',
+    'Symmetric',
     'XML')
 
 L = sorted(os.listdir(prefix))
@@ -21,9 +21,9 @@ fname = os.path.join(
     'code',
     'data_input',
     'params',
-    'AllTC_Asym_XML')
+    'All_TC_Sym_XML.txt')
 f = open(fname, 'w')
-f.write('ASYM_TSPLIB_XML\n')
-f.write('ASYM\n')
+f.write('SYM_TSPLIB_XML\n')
+f.write('SYM\n')
 f.writelines(L)
 f.close()
