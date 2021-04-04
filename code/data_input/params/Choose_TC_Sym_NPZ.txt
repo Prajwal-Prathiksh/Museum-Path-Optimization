@@ -1,3 +1,6 @@
 TSPLIB_NPZ
 SYM
+burma14
+bayg29
+bays29
 a280

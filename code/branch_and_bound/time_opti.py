@@ -128,8 +128,8 @@ class Node:
 
     def debug(self):
         print(
-            "Tour: {} | Cost = {} | Node = {} | Level = {}".format(
-                self.tour, self.cost, self.Id, self.level
+            "Level = {} | Cost = {} | Node = {}".format(
+                self.level, self.cost, self.Id
             )
         )
 
@@ -289,7 +289,7 @@ def solve(cost_matrix):
     while not live_nodes.empty():
         # a live node with the least estimated cost is selected
         minimum = live_nodes.get()[1]
-        # minimum.debug()
+        minimum.debug()  # for debugging purposes
 
         i = minimum.Id  # `i` stores the current node number
 
@@ -323,9 +323,8 @@ def solve(cost_matrix):
 
                 # # For debugging
                 # print(
-                # "Branch node cost: ", branch_node.cost, "minimum.cost",
-                # minimum.cost, "minimum.reduced_matrix[i][j]",
-                # minimum.reduced_matrix[i][j]
+                #     "Branch node cost: ",
+                #     branch_node.cost
                 # )
 
                 # added the child to list of live nodes
