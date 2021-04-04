@@ -751,8 +751,8 @@ class ComplexSimulatedAnnealing:
             Swapped solution
         '''
         x0 = x.copy()
-        # if(loc_bar == len(x0)):
-        #     return x0
+        if(loc_bar == len(x0)):
+            return x0
 
         e1 = np.random.randint(0, loc_bar)
         e2 = np.random.randint(loc_bar, len(x0))
