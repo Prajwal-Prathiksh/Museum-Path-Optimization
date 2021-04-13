@@ -126,12 +126,19 @@ class Node:
         else:
             return False
 
-    def debug(self):
-        print(
-            "Level = {} | Cost = {} | Node = {}".format(
-                self.level, self.cost, self.Id
+    def debug(self, with_tour=False):
+        if with_tour:
+            print(
+                "Level = {} | Cost = {} | Node = {} | Tour = {}".format(
+                    self.level, self.cost, self.Id, self.tour
+                )
             )
-        )
+        else:
+            print(
+                "Level = {} | Cost = {} | Node = {}".format(
+                    self.level, self.cost, self.Id
+                )
+            )
 
 
 def CreateNode(parent_matrix, tour, level, i, j):
@@ -269,11 +276,12 @@ def matrix_reduction_generic(reduced_matrix):
 
 
 @function_timer
-def solve(cost_matrix):
+def solve(cost_matrix, is_tour_stored=False):
     # Create a priority queue to store live nodes of the search tree
     live_nodes = PriorityQueue()
 
     tour = []
+    full_tour = []
 
     # The TSP starts from the first node, i.e., node 0
     root = CreateNode(cost_matrix, tour, 0, -1, 0)
@@ -289,15 +297,18 @@ def solve(cost_matrix):
     while not live_nodes.empty():
         # a live node with the least estimated cost is selected
         minimum = live_nodes.get()[1]
-        minimum.debug()  # for debugging purposes
+        minimum.debug(with_tour=True)  # for debugging purposes
+
+        if is_tour_stored:
+            full_tour.append(minimum.tour)
 
         i = minimum.Id  # `i` stores the current node number
 
         # if all nodes are visited; termination of loop
         if minimum.level == N - 1:
             minimum.tour.append([i, 0])  # return to starting node
-            return minimum  # final node
-            break
+            # print("Returning minimum node of type", type(minimum))
+            return minimum, full_tour  # final node
 
         # do for each child of min
         # `(i, j)` forms an edge in a space tree
@@ -342,7 +353,7 @@ def print_tour(node):
         print(node.tour)
 
 
-def print_summary(output_dir, node, tc_name=None, ext=""):
+def print_summary(output_dir, node, full_tour=[], tc_name=None, ext=""):
     """
         Prints the solver summary, and stores it in a `.log` file.
 
@@ -397,6 +408,8 @@ def print_summary(output_dir, node, tc_name=None, ext=""):
                 time_taken=time_taken,
                 func_calls=reduction_calls,
                 opt_cost=node.cost,
+                tour=node.tour,
+                full_tour=np.array(full_tour, dtype="object"),
             )
             print(f"\nSummary data saved at: {fname}")
     finally:
@@ -421,20 +434,24 @@ def main():
 
     tc_number = args.tc_number
     tc_name = loader.get_test_case_name(tc_number)
-    print(tc_name)
     cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
 
-    COST_MATRIX = cost_matrix
+    # COST_MATRIX = cost_matrix
 
-    # tc_name = "Manual input"
+    tc_name = "Manual input"
 
-    # COST_MATRIX = [
-    #     [INF, 10, 8, 9, 7],
-    #     [10, INF, 10, 5, 6],
-    #     [8, 10, INF, 8, 9],
-    #     [9, 5, 8, INF, 6],
-    #     [7, 6, 9, 6, INF]
-    # ]  # optimal cost is 34
+    print(tc_name)
+
+    # inf = INF
+    # COST_MATRIX = np.load("data/manual/2floorcostmatrix.npy")
+
+    COST_MATRIX = [
+        [INF, 10, 8, 9, 7],
+        [10, INF, 10, 5, 6],
+        [8, 10, INF, 8, 9],
+        [9, 5, 8, INF, 6],
+        [7, 6, 9, 6, INF],
+    ]  # optimal cost is 34
 
     # COST_MATRIX = [
     #     [INF, 3, 1, 5, 8],
@@ -472,12 +489,19 @@ def main():
 
     # print(COST_MATRIX)
 
-    final_node = solve(COST_MATRIX)
+    final_node, full_tour = solve(COST_MATRIX, is_tour_stored=True)
+    # print(type(final_node))
     optimal_cost = final_node.cost
 
     # print_tour(final_node)
     if True:
-        print_summary(output_dir, final_node, tc_name=tc_name, ext=ext)
+        print_summary(
+            output_dir,
+            final_node,
+            full_tour=full_tour,
+            tc_name=tc_name,
+            ext=ext,
+        )
 
     # print("Total cost is {}".format(optimal_cost))
 
