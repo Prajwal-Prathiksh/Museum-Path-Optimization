@@ -21,7 +21,29 @@ results = np.load(
 tour = results["tour"]
 full_tour = results["full_tour"]
 
-coordi = np.random.rand(len(tour), 2) * 10
+# coordi = np.random.rand(len(tour), 2) * 10
+coordi = np.array(
+    [
+        [0, 248],
+        [290, 248],
+        [365, 248],
+        [290, 184],
+        [365, 184],
+        [440, 248],
+        [440, 184],
+        [504, 184],
+        [624, 184],
+        [624, 64],
+        [504, 64],
+        [440, 64],
+        [440, 0],
+        [365, 64],
+        [290, 64],
+        [365, 0],
+        [290, 0],
+        [0, 0],
+    ]
+)
 
 # coordi[1]
 
@@ -57,8 +79,8 @@ tour_ani = animation.FuncAnimation(
     fig, next_tour, len(full_tour), interval=1000, init_func=init, blit=True
 )
 
-writer = animation.FFMpegWriter(fps=1)
-tour_ani.save("output/branch_and_bound/BnB/tour_ani.mp4", writer=writer)
+writer = animation.FFMpegWriter(fps=4)
+tour_ani.save("output/branch_and_bound/BnB/tour_ani_new.mp4", writer=writer)
 
 # plt.plot(coordi[1][0],coordi[1][1])
 plt.show()
