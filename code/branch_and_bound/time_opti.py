@@ -300,13 +300,14 @@ def solve(cost_matrix, is_tour_stored=False):
         minimum.debug(with_tour=True)  # for debugging purposes
 
         if is_tour_stored:
-            full_tour.append(minimum.tour)
+            full_tour.append(copy.deepcopy(minimum.tour))
 
         i = minimum.Id  # `i` stores the current node number
 
         # if all nodes are visited; termination of loop
         if minimum.level == N - 1:
             minimum.tour.append([i, 0])  # return to starting node
+            full_tour.append(minimum.tour)
             # print("Returning minimum node of type", type(minimum))
             return minimum, full_tour  # final node
 
