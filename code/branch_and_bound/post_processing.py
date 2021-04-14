@@ -54,11 +54,11 @@ def next_tour(tour_num):
 
 
 tour_ani = animation.FuncAnimation(
-    fig, next_tour, len(full_tour), interval=500, init_func=init, blit=True
+    fig, next_tour, len(full_tour), interval=1000, init_func=init, blit=True
 )
 
-writer = animation.PillowWriter(fps=30)
-tour_ani.save("output/branch_and_bound/BnB/tour_ani.gif", writer=writer)
+writer = animation.FFMpegWriter(fps=1)
+tour_ani.save("output/branch_and_bound/BnB/tour_ani.mp4", writer=writer)
 
 # plt.plot(coordi[1][0],coordi[1][1])
 plt.show()
