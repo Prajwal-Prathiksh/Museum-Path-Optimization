@@ -261,7 +261,7 @@ class Coordinate:
                 List of Coordinate instances.
                 Note:
                 -----
-                Each element of the list is Coordinate instance, whose 
+                Each element of the list is Coordinate instance, whose
                 coordinates can be accessed like so:
                 ```
                     for i in range(len(initial_coords)):
@@ -635,7 +635,7 @@ class ComplexSimulatedAnnealing:
         self.final_cost = round(
             self.func0(
                 [self.final_x[:self.final_loc_bar], S, coords, velocity]
-            ), 
+            ),
             3
         )
 
@@ -1016,11 +1016,11 @@ class ComplexSimulatedAnnealing:
                 fname = os.path.join(self.output_dir, f'results.npz')
                 np.savez(
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
-                    permut=permut, x0=x0, cost0=cost0, final_x=final_x, 
-                    final_cost=final_cost, final_loc_bar=final_loc_bar, 
+                    permut=permut, x0=x0, cost0=cost0, final_x=final_x,
+                    final_cost=final_cost, final_loc_bar=final_loc_bar,
                     final_t=final_t, final_sl=final_sl, lamda=lamda,
-                    increase_in_cost=increase_in_cost, T0=T0, alpha=alpha, 
-                    delta=delta, epochs=epochs, N_per_epochs=N_per_epochs, 
+                    increase_in_cost=increase_in_cost, T0=T0, alpha=alpha,
+                    delta=delta, epochs=epochs, N_per_epochs=N_per_epochs,
                     cooling_func=cooling_func, vel=vel, T_max=T_max,
                     cost_hist=self.cost_hist
                 )
