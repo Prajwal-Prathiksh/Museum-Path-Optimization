@@ -38,7 +38,7 @@ def list_input_filter_cases(runs, predicate=None, **params):
     return list(filter(_check_match, runs))
 
 
-class ComplexSimulatedAnnealing(Problem):
+class ComplexSimulatedAnnealingParamTuning(Problem):
     def get_name(self):
         return 'complex_simulated_annealing'
 
@@ -85,8 +85,12 @@ class ComplexSimulatedAnnealing(Problem):
         plt.close()
 
     def _plot_parameter_tuning(
-        self, param_name, param_vals, cases_var, cases_vals, ext=''
+        self, param_name, param_vals, cases_var, cases_vals, ext='', 
+        sim_cases=None
     ):
+        if sim_cases is None:
+            sim_cases = self.cases
+
         fig, axs = plt.subplots(1, 1, figsize=(12, 6))
 
         for case_item in cases_vals:
@@ -95,10 +99,10 @@ class ComplexSimulatedAnnealing(Problem):
             for param_item in param_vals:
                 attrs = {param_name: param_item}
                 attrs.update(cases_attrs)
-                cases = filter_cases(self.cases, **attrs)
+                cases = filter_cases(sim_cases, **attrs)
                 for case in cases:
                     data = case.data
-                    final_cost.append(data['final_cost'])
+                    final_cost.append(data['final_sl'])
                     temp_x.append(param_item)
             axs.plot(
                 temp_x, final_cost, label=f'{cases_var}:{case_item}',
@@ -120,7 +124,7 @@ class ComplexSimulatedAnnealing(Problem):
 
         # Base commands
         code_name = 'code/simulated_annealing/complex_simulated_annealing.py'
-        base_cmd = f'python {code_name} --s --d $output_dir'
+        base_cmd = f'python {code_name} --s --mod-cost --d $output_dir'
 
         self.epochs, self.n_epochs = 1000, 200
         self.n = [40, 60, 80]
@@ -128,7 +132,7 @@ class ComplexSimulatedAnnealing(Problem):
 
         # T
         self.T = np.linspace(30, 120, N_param).astype(int)
-        self.cases = [
+        self.cases_T = [
             Simulation(
                 root=get_path(f'n_{num_nodes}_T_{param}'),
                 job_info=dict(n_core=1, n_thread=1),
@@ -136,14 +140,19 @@ class ComplexSimulatedAnnealing(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
+                t_max=num_nodes*0.25,
                 T=param,
             )
             for param, num_nodes in product(self.T, self.n)
         ]
+        self.cases = self.cases_T.copy()
 
-        # Alpha
-        self.alpha = np.round(np.linspace(0.5, 1.5, N_param), 3)
-        cases = [
+        # # Alpha
+        self.alpha = np.append(
+            np.round(np.linspace(0.5, 1.5, N_param), 3), 0.99
+        )
+        self.alpha = np.sort(self.alpha)
+        self.cases_alpha = [
             Simulation(
                 root=get_path(f'n_{num_nodes}_alpha_{param}'),
                 job_info=dict(n_core=1, n_thread=1),
@@ -151,25 +160,30 @@ class ComplexSimulatedAnnealing(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
-                T=50,
+                t_max=num_nodes*0.25,
+                T=60,
                 alpha=param,
             )
             for param, num_nodes in product(self.alpha, self.n)
         ]
-        self.cases += cases
+        self.cases += self.cases_alpha
 
         # ## k
-        # self.k =
+        # self.k = np.append(
+        #     np.round(np.linspace(0.01, 0.999, N_param), 3), 0.6
+        # )
+        # self.k = np.sort(self.k)
         # cases = [
         #     Simulation(
-        #         root=get_path(f'n_{num_nodes}_alpha_{param}'),
+        #         root=get_path(f'n_{num_nodes}_k_{param}'),
         #         job_info=dict(n_core=1, n_thread=1),
         #         base_command=base_cmd,
         #         n_epoch=self.n_epochs,
         #         epoch=self.epochs,
         #         n=num_nodes,
-        #         T=,
-        #         alpha=,
+        #         t_max=num_nodes*0.25,
+        #         T=50,
+        #         alpha=0.944,
         #         k=param,
         #     )
         #     for param, num_nodes in product(self.k, self.n)
@@ -186,6 +200,7 @@ class ComplexSimulatedAnnealing(Problem):
         #         n_epoch=self.n_epochs,
         #         epoch=self.epochs,
         #         n=num_nodes,
+        #         t_max=num_nodes*0.25,
         #         T=,
         #         alpha=,
         #         k=,
@@ -205,6 +220,7 @@ class ComplexSimulatedAnnealing(Problem):
         #         n_epoch=self.n_epochs,
         #         epoch=self.epochs,
         #         n=num_nodes,
+        #         t_max=num_nodes*0.25,
         #         T=,
         #         alpha=,
         #         k=,
@@ -219,11 +235,11 @@ class ComplexSimulatedAnnealing(Problem):
         self.make_output_dir()
         self._plot_parameter_tuning(
             param_name='T', param_vals=self.T, cases_var='n',
-            cases_vals=self.n
+            cases_vals=self.n, sim_cases=self.cases_T
         )
         self._plot_parameter_tuning(
             param_name='alpha', param_vals=self.alpha, cases_var='n',
-            cases_vals=self.n
+            cases_vals=self.n, sim_cases=self.cases_alpha
         )
         # self._plot_parameter_tuning(
         #     param_name='k', param_vals=self.k, cases_var='n',
@@ -241,7 +257,7 @@ class ComplexSimulatedAnnealing(Problem):
         # self._plot_runtimes(ext='epoch_1000_', epoch=self.epochs)
 
 
-class SimpleSimulatedAnnealing(ComplexSimulatedAnnealing):
+class SimpleSimulatedAnnealing(ComplexSimulatedAnnealingParamTuning):
     def get_name(self):
         return 'simple_simulated_annealing'
 
@@ -310,7 +326,7 @@ class SimpleSimulatedAnnealing(ComplexSimulatedAnnealing):
 if __name__ == '__main__':
     PROBLEMS = [
         # SimpleSimulatedAnnealing,
-        ComplexSimulatedAnnealing
+        ComplexSimulatedAnnealingParamTuning
     ]
     automator = Automator(
         simulation_dir='output/simulated_annealing/automate',
