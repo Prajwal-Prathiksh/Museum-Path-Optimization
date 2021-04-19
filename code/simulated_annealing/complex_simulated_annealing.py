@@ -1041,7 +1041,7 @@ class ComplexSimulatedAnnealing:
         cost0 = self.func1(x, self.coords)
         T = self.T0
         len_x = len(x)
-        print('\n\nRun Distance Minimization:\n')
+        print('\n\n\nRun Distance Minimization:\n')
 
         for epoch in range(self.epochs):
             # Store history of cost
@@ -1050,8 +1050,6 @@ class ComplexSimulatedAnnealing:
                 f'Epoch: {epoch} | t = {round(cost0, 3)}' +
                 f' | t_max = {self.T_max}', end='\r'
             )
-
-            T = self.cooling_func(T, self.alpha, epoch)
 
             for i in range(self.N_per_epochs):
                 # Exchange two elements and get a new neighbour solution
@@ -1080,6 +1078,8 @@ class ComplexSimulatedAnnealing:
                         temp = x[e1]
                         x[e1] = x[e2]
                         x[e2] = temp
+            
+            T = self.cooling_func(T, self.alpha, epoch)
 
         return x
 
