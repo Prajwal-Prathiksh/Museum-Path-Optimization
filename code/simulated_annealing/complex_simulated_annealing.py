@@ -15,7 +15,7 @@ from numba import njit
 ###########################################################################
 # Code
 ###########################################################################
-global OUTPUT_DIR, LAMBDA
+global OUTPUT_DIR, lamda
 OUTPUT_DIR = os.path.join(
     os.getcwd(), 'output', 'simulated_annealing'
 )
@@ -70,7 +70,7 @@ def cli_parser():
         default=0.99, help='Cooling factor'
     )
     parser.add_argument(
-        '--lambda', action='store', dest='LAMBDA', type=float,
+        '--lamda', action='store', dest='lamda', type=float,
         default=0.5, help='Penalty coefficient for inequality constraints'
     )
     parser.add_argument(
@@ -332,7 +332,7 @@ class Coordinate:
             satisfaction += S[i]
 
         return satisfaction - \
-            LAMBDA * Coordinate.time_taken(x, coords, velocity)
+            lamda * Coordinate.time_taken(x, coords, velocity)
 
     @staticmethod
     @function_calls
@@ -632,7 +632,12 @@ class ComplexSimulatedAnnealing:
         # Run Algorithm
         self.final_x, self.final_loc_bar, self.cost_hist, self.rt = \
             self.run_algorithm()
-        self.final_cost = round(self.cost_hist[-1], 3)
+        self.final_cost = round(
+            self.func0(
+                [self.final_x[:self.final_loc_bar], S, coords, velocity]
+            ), 
+            3
+        )
 
         self.increase_in_cost = round(
             np.abs(1 - self.cost0 / self.final_cost) * 100, 3
@@ -1000,7 +1005,7 @@ class ComplexSimulatedAnnealing:
             printing(f'delta = {delta} | k = {k}')
             printing(f'epochs = {epochs} | iter/epoch = {N_per_epochs}')
             printing(f'Velocity = {vel} | T_max = {T_max}')
-            printing(f'Lambda value: {LAMBDA}')
+            printing(f'lamda value: {lamda}')
             printing(f'Cooling Function: {cooling_func}()')
 
             printing('\n===================================================\n')
@@ -1013,7 +1018,7 @@ class ComplexSimulatedAnnealing:
                     fname, rt=rt, func0_calls=func0_calls, x0_len=x0_len,
                     permut=permut, x0=x0, cost0=cost0, final_x=final_x, 
                     final_cost=final_cost, final_loc_bar=final_loc_bar, 
-                    final_t=final_t, final_sl=final_sl, LAMBDA=LAMBDA,
+                    final_t=final_t, final_sl=final_sl, lamda=lamda,
                     increase_in_cost=increase_in_cost, T0=T0, alpha=alpha, 
                     delta=delta, epochs=epochs, N_per_epochs=N_per_epochs, 
                     cooling_func=cooling_func, vel=vel, T_max=T_max,
@@ -1064,7 +1069,7 @@ if __name__ == '__main__':
     # Generate random coordinates, initial solution that satifies constraints
     n = args.n
     velocity, T_max, delta, k = args.vel, args.T_max, args.delta, args.k
-    LAMBDA = args.LAMBDA
+    lamda = args.lamda
 
     feasible_solution = Coordinate.get_feasible_solution(
         n, velocity, T_max, seed=1, low=0, high=11
