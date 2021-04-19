@@ -298,7 +298,7 @@ def solve(cost_matrix, is_tour_stored=False):
     while not live_nodes.empty():
         # a live node with the least estimated cost is selected
         minimum = live_nodes.get()[1]
-        minimum.debug(with_tour=True)  # for debugging purposes
+        # minimum.debug(with_tour=True)  # for debugging purposes
 
         if is_tour_stored:
             full_tour.append(copy.deepcopy(minimum.tour))
@@ -427,7 +427,7 @@ def main():
     print("Solving symmetric problem...")
 
     # # Read data off of standard library for asymmetric
-    # loader = get_input_loader('Choose_TC_Asym_NPZ.txt', False)
+    # loader = get_input_loader("Choose_TC_Asym_NPZ.txt", False)
     # print("\nSolving asymmetric problem...")
 
     # Parse command line arguments
@@ -442,11 +442,11 @@ def main():
     coordi = None
     cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
 
-    # COST_MATRIX = cost_matrix
+    COST_MATRIX = cost_matrix
 
-    tc_name = "Manual input"
+    # tc_name = "Manual input"
 
-    print(tc_name)
+    print("Test case name: ", tc_name)
 
     inf = INF
     # COST_MATRIX = np.load("data/manual/2floorcostmatrix.npy")
@@ -454,8 +454,8 @@ def main():
     # `N` is the total number of total nodes on the graph
     global N
 
-    N = 14
-    COST_MATRIX, coordi = get_input(N, fetch_coordinates=True)
+    # N = 14
+    # COST_MATRIX, coordi = get_input(N, fetch_coordinates=True)
 
     # COST_MATRIX = [
     #     [INF, 10, 8, 9, 7],
@@ -495,9 +495,9 @@ def main():
             if COST_MATRIX[i][j] == 0:
                 COST_MATRIX[i][j] = INF
 
-    print("Number of nodes are {}".format(N))
+    print("Cost Matrix is:\n", COST_MATRIX)
 
-    # print(COST_MATRIX)
+    print("Number of nodes are {}".format(N))
 
     final_node, full_tour = solve(COST_MATRIX, is_tour_stored=True)
     # print(type(final_node))
@@ -514,7 +514,7 @@ def main():
             coordi=coordi,
         )
 
-    # print("Total cost is {}".format(optimal_cost))
+    print("Total cost is {}".format(optimal_cost))
 
 
 if __name__ == "__main__":
