@@ -258,7 +258,17 @@ class Coordinate:
             Returns:
             --------
             initial_coords: (List)
-                List of Coordinate instances
+                List of Coordinate instances.
+                Note:
+                -----
+                Each element of the list is Coordinate instance, whose 
+                coordinates can be accessed like so:
+                ```
+                    for i in range(len(initial_coords)):
+                        coord_x = initial_coords[i].x
+                        coord_y = initial_coords[i].y
+                        print(i, coord_x, coord_y)
+                ```
             initial_solution: (List)
                 List of Coordinate indices corresponding to a feasible solution
             S: (List)
