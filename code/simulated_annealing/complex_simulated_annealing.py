@@ -102,6 +102,10 @@ def cli_parser():
         help='DOES NOT consider constraints while optimizing the problem'
     )
     parser.add_argument(
+        '--optim-dist', action='store_true', dest='optimize_distance',
+        help='Minimises the travel path seperately for the optimiszed solution'
+    )
+    parser.add_argument(
         '--ext', action='store', dest='ext', type=str,
         default='',
         help='Add a prefix to the plots, summary_data and summary_log '
@@ -206,6 +210,40 @@ class Coordinate:
         # Distance between the first and the last exhibits is added
         dist += Coordinate.get_distance(
             coords[0].x, coords[0].y, coords[-1].x, coords[-1].y
+        )
+        return dist
+
+    @staticmethod
+    def get_travel_distance(x, coords):
+        '''
+            Calculates the total path distance for a given list of nodes.
+
+            Parameters:
+            -----------
+            x: (List)
+                List of nodes
+            coords: (List)
+                List of Coordinate instances
+
+            Returns:
+            --------
+            dist: (float)
+                Total travel distance
+        '''
+        dist = 0.0
+        travel_coords = []
+        for i in x:
+            travel_coords.append(coords[i])
+
+        for first, second in zip(travel_coords[:-1], travel_coords[1:]):
+            # Distance between successive exhibits are added
+            dist += Coordinate.get_distance(
+                first.x, first.y, second.x, second.y
+            )
+
+        # Distance between the first and the last exhibits is added
+        dist += Coordinate.get_distance(
+            travel_coords[0].x, travel_coords[0].y, travel_coords[-1].x, travel_coords[-1].y
         )
         return dist
 
@@ -334,11 +372,19 @@ class Coordinate:
     @function_calls
     def satisfaction_with_time_penalty(data):
         x, S, coords, velocity = data[0], data[1], data[2], data[3]
+        T_max = data[4]
+
         satisfaction = 0
         for i in x:
             satisfaction += S[i]
 
-        penalty = Coordinate.time_taken(x, coords, velocity) + len(x)
+        travel_time = Coordinate.time_taken(x, coords, velocity)
+        
+        fac = 0.0
+        if travel_time > T_max:
+            fac = np.exp(travel_time - T_max)
+
+        penalty = travel_time + len(x) + fac
         return satisfaction - (lamda * penalty)
 
     @staticmethod
@@ -401,7 +447,7 @@ class Coordinate:
     @staticmethod
     def plot_solution(
         func0, initial_coords, initial_solution, loc_bar, final_solution,
-        final_loc_bar, S, velocity, output_dir, ext='', save=False,
+        final_loc_bar, S, velocity, T_max, output_dir, ext='', save=False,
     ):
         '''
             Plots the inital and the optimized solution in a convinient format.
@@ -420,6 +466,8 @@ class Coordinate:
                 Final location of bar, number of exhibits visited
             S: (List)
                 Array of satisfaction level of each exhibit in the Muesuem
+            T_max: (float)
+                Maximum time the tourist can spend in the museum (in s)
             output_dir: (string)
                 Absolute path of the output directory
             ext: (string), default=''
@@ -484,11 +532,14 @@ class Coordinate:
         )
 
         old_cost = round(
-            func0([initial_solution[:loc_bar], S, initial_coords, velocity]), 2
+            func0(
+                [initial_solution[:loc_bar], S, initial_coords, velocity, 
+                T_max]), 2
         )
         new_cost = round(
             func0(
-                [final_solution[:final_loc_bar], S, initial_coords, velocity]
+                [final_solution[:final_loc_bar], S, initial_coords, velocity,
+                T_max]
             ), 2
         )
 
@@ -554,7 +605,7 @@ class ComplexSimulatedAnnealing:
     def __init__(
         self, func0, ignore_constraints, check_constraints, coords, x0,
         loc_bar, velocity, T_max, S, T0, alpha, epochs, N_per_epochs, delta, k,
-        output_dir, cooling_func='simp', ext='', **kwargs
+        func1, optimize_distance, output_dir, cooling_func='simp', ext='', **kwargs
     ):
         '''
             Parameters:
@@ -602,9 +653,12 @@ class ComplexSimulatedAnnealing:
         self.output_dir = output_dir
         # Initialize
         self.func0 = func0
+        self.func1 = func1
         self.ignore_constraints = ignore_constraints
         self.check_constraints = check_constraints
-        self.cost0 = round(self.func0([x0[:loc_bar], S, coords, velocity]), 3)
+        self.cost0 = round(
+            self.func0([x0[:loc_bar], S, coords, velocity, T_max]), 3
+        )
 
         # Set number of function calls to zero
         self.func0_calls = 0
@@ -621,6 +675,7 @@ class ComplexSimulatedAnnealing:
         self.epochs = epochs
         self.N_per_epochs = N_per_epochs
         self.delta = delta
+        self.optimize_distance = optimize_distance
         self.k = k
         self.ext = ext
 
@@ -644,7 +699,8 @@ class ComplexSimulatedAnnealing:
             self.run_algorithm()
         self.final_cost = round(
             self.func0(
-                [self.final_x[:self.final_loc_bar], S, coords, velocity]
+                [self.final_x[:self.final_loc_bar], S, coords, velocity, 
+                self.T_max]
             ),
             3
         )
@@ -860,7 +916,7 @@ class ComplexSimulatedAnnealing:
         S = self.S
         T = self.T0
         k = self.k
-        cost = self.func0([x[:loc_bar], S, coords, velocity])
+        cost = self.func0([x[:loc_bar], S, coords, velocity, self.T_max])
 
         apply_swap = ComplexSimulatedAnnealing.apply_swap
         apply_shake = ComplexSimulatedAnnealing.apply_shake
@@ -897,7 +953,7 @@ class ComplexSimulatedAnnealing:
                 loc_bar_new = modify_nodes(len(x), loc_bar, k)
                 x_new = apply_shake(x, loc_bar_new)
                 cost_new = self.func0(
-                    [x_new[:loc_bar_new], S, coords, velocity])
+                    [x_new[:loc_bar_new], S, coords, velocity, self.T_max])
 
                 if(
                     self.ignore_constraints or self.check_constraints(
@@ -932,13 +988,66 @@ class ComplexSimulatedAnnealing:
                         )
                     ):
                         x = x_new
-                        cost = self.func0([x[:loc_bar], S, coords, velocity])
+                        cost = self.func0(
+                            [x[:loc_bar], S, coords, velocity, self.T_max]
+                        )
+
+        if self.optimize_distance is True:
+            x[:loc_bar] = self.run_optimize_distance(x[:loc_bar])
 
         toc = time.monotonic()
         rt = toc - tic
 
         cost_hist = np.array(cost_hist)
         return x, loc_bar, cost_hist, round(rt, 3)
+
+    def run_optimize_distance(self, final_x):
+        '''
+            A simple Simulated Annealing algorithm.
+
+            Returns:
+            --------
+            x: (Array)
+                Optimized solution
+            cost_hist: (Array)
+                History of cost of the objective function
+            rt: (float)
+                Runtime of the algorithm in fractional seconds
+        '''
+        x = final_x.copy()
+        cost0 = self.func1(x, self.coords)
+        T = self.T0
+        len_x = len(x)
+
+        for epoch in range(self.epochs):
+            # Store history of cost
+
+            print(f'Epoch: {epoch} | Cost = {round(cost0, 3)}', end='\r')
+
+            T = self.cooling_func(T, self.alpha, epoch)
+
+            for i in range(self.N_per_epochs):
+                # Exchange two elements and get a new neighbour solution
+                e1, e2 = np.random.randint(0, len_x, size=2)
+                temp = x[e1]
+                x[e1] = x[e2]
+                x[e2] = temp
+
+                # Get the new cost
+                cost1 = self.func1(x, self.coords)
+
+                if cost1 < cost0:
+                    cost0 = cost1
+                else:
+                    if np.random.uniform() < np.math.exp((cost0 - cost1) / T):
+                        cost0 = cost1
+                    else:
+                        # Re-swap
+                        temp = x[e1]
+                        x[e1] = x[e2]
+                        x[e2] = temp
+
+        return x
 
     def solver_summary(self, tc_name=None, save=True):
         '''
@@ -1102,6 +1211,8 @@ if __name__ == '__main__':
 
     optim_solution = ComplexSimulatedAnnealing(
         func0=func0,
+        func1=Coordinate.get_travel_distance, 
+        optimize_distance=args.optimize_distance,
         ignore_constraints=args.ignore_constraints,
         check_constraints=Coordinate.constraints,
         coords=initial_coords,
@@ -1129,6 +1240,7 @@ if __name__ == '__main__':
         final_solution=optim_solution.final_x,
         final_loc_bar=optim_solution.final_loc_bar,
         S=S,
+        T_max=T_max,
         velocity=velocity,
         ext=ext,
         save=SAVE,
