@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-
 ###########################################################################
 # Code
 ###########################################################################
@@ -20,30 +19,9 @@ results = np.load(
 
 tour = results["tour"]
 full_tour = results["full_tour"]
+coordi = results["coordi"]
 
 # coordi = np.random.rand(len(tour), 2) * 10
-coordi = np.array(
-    [
-        [0, 248],
-        [290, 248],
-        [365, 248],
-        [290, 184],
-        [365, 184],
-        [440, 248],
-        [440, 184],
-        [504, 184],
-        [624, 184],
-        [624, 64],
-        [504, 64],
-        [440, 64],
-        [440, 0],
-        [365, 64],
-        [290, 64],
-        [365, 0],
-        [290, 0],
-        [0, 0],
-    ]
-)
 
 # coordi[1]
 
@@ -57,6 +35,14 @@ for edge in full_tour[-1]:
 plt.plot(xpt, ypt, "or")
 
 (tour_plot,) = plt.plot([], [], "-ob")
+
+text_plot = ax.text(
+    3.6,
+    10.8,
+    "Iteration no.: ",
+    style="italic",
+    bbox={"facecolor": "yellow", "alpha": 0.5, "pad": 10},
+)
 
 
 def init():
@@ -72,15 +58,28 @@ def next_tour(tour_num):
         xdata.append([coordi[i][0], coordi[j][0]])
         ydata.append([coordi[i][1], coordi[j][1]])
     tour_plot.set_data(xdata, ydata)
+    text_plot.set_text(f"Iteration no.: {tour_num}")
     return (tour_plot,)
 
 
 tour_ani = animation.FuncAnimation(
-    fig, next_tour, len(full_tour), interval=1000, init_func=init, blit=True
+    fig,
+    next_tour,
+    len(full_tour),
+    interval=20,
+    init_func=init,
+    blit=False,
+    repeat=False,
 )
 
-writer = animation.FFMpegWriter(fps=4)
-tour_ani.save("output/branch_and_bound/BnB/tour_ani_new.mp4", writer=writer)
+SAVE = False
+if SAVE == True:
+    writer = animation.FFMpegWriter(fps=50)
+    tour_ani.save(
+        "output/branch_and_bound/BnB/tour_ani_new.mp4", writer=writer
+    )
 
-# plt.plot(coordi[1][0],coordi[1][1])
 plt.show()
+
+# Save last frame
+fig.savefig("output/branch_and_bound/BnB/tour_ani_new.png")
