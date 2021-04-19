@@ -168,7 +168,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         ]
         self.cases += self.cases_alpha
 
-        ## k
+        # k
         self.k = np.append(
             np.round(np.linspace(0.01, 0.999, N_param), 3), 0.6
         )
@@ -181,7 +181,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
-                t_max=num_nodes*0.25,
+                t_max=num_nodes * 0.25,
                 T=60,
                 alpha=0.944,
                 k=param,
@@ -190,7 +190,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         ]
         self.cases += self.cases_k
 
-        ## Delta
+        # Delta
         self.delta = np.linspace(5, 30, N_param).astype(int)
         self.cases_delta = [
             Simulation(
@@ -200,7 +200,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
-                t_max=num_nodes*0.25,
+                t_max=num_nodes * 0.25,
                 T=60,
                 alpha=0.944,
                 k=0.889,
@@ -210,7 +210,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         ]
         self.cases += self.cases_delta
 
-        ## Lamda - With constraints
+        # Lamda - With constraints
         self.lamda = np.append(
             np.round(np.linspace(0.01, 15, N_param), 3), 0.5
         )
@@ -223,7 +223,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
-                t_max=num_nodes*0.25,
+                t_max=num_nodes * 0.25,
                 T=60,
                 alpha=0.944,
                 k=0.889,
@@ -234,9 +234,9 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         ]
         self.cases += self.cases_lamda
 
-        ## Lamda - Without constraints
+        # Lamda - Without constraints
         self.lamda = np.append(
-            np.round(np.linspace(0.01, 8, N_param), 3), 0.5
+            np.round(np.linspace(0.01, 6, N_param), 3), 0.5
         )
         self.lamda = np.sort(self.lamda)
         self.cases_lamda_no_const = [
@@ -247,7 +247,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
-                t_max=num_nodes*0.25,
+                t_max=num_nodes * 0.8,
                 T=60,
                 alpha=0.944,
                 k=0.889,

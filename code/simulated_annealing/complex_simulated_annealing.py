@@ -242,9 +242,10 @@ class Coordinate:
             )
 
         # Distance between the first and the last exhibits is added
-        dist += Coordinate.get_distance(
-            travel_coords[0].x, travel_coords[0].y, travel_coords[-1].x, travel_coords[-1].y
-        )
+        dist += Coordinate.get_distance(travel_coords[0].x,
+                                        travel_coords[0].y,
+                                        travel_coords[-1].x,
+                                        travel_coords[-1].y)
         return dist
 
     @staticmethod
@@ -379,7 +380,7 @@ class Coordinate:
             satisfaction += S[i]
 
         travel_time = Coordinate.time_taken(x, coords, velocity)
-        
+
         fac = 0.0
         if travel_time > T_max:
             fac = np.exp(travel_time - T_max)
@@ -533,13 +534,13 @@ class Coordinate:
 
         old_cost = round(
             func0(
-                [initial_solution[:loc_bar], S, initial_coords, velocity, 
-                T_max]), 2
+                [initial_solution[:loc_bar], S, initial_coords, velocity,
+                 T_max]), 2
         )
         new_cost = round(
             func0(
                 [final_solution[:final_loc_bar], S, initial_coords, velocity,
-                T_max]
+                 T_max]
             ), 2
         )
 
@@ -603,10 +604,28 @@ class ComplexSimulatedAnnealing:
     '''
 
     def __init__(
-        self, func0, ignore_constraints, check_constraints, coords, x0,
-        loc_bar, velocity, T_max, S, T0, alpha, epochs, N_per_epochs, delta, k,
-        func1, optimize_distance, output_dir, cooling_func='simp', ext='', **kwargs
-    ):
+            self,
+            func0,
+            ignore_constraints,
+            check_constraints,
+            coords,
+            x0,
+            loc_bar,
+            velocity,
+            T_max,
+            S,
+            T0,
+            alpha,
+            epochs,
+            N_per_epochs,
+            delta,
+            k,
+            func1,
+            optimize_distance,
+            output_dir,
+            cooling_func='simp',
+            ext='',
+            **kwargs):
         '''
             Parameters:
             -----------
@@ -699,8 +718,8 @@ class ComplexSimulatedAnnealing:
             self.run_algorithm()
         self.final_cost = round(
             self.func0(
-                [self.final_x[:self.final_loc_bar], S, coords, velocity, 
-                self.T_max]
+                [self.final_x[:self.final_loc_bar], S, coords, velocity,
+                 self.T_max]
             ),
             3
         )
@@ -1211,7 +1230,7 @@ if __name__ == '__main__':
 
     optim_solution = ComplexSimulatedAnnealing(
         func0=func0,
-        func1=Coordinate.get_travel_distance, 
+        func1=Coordinate.get_travel_distance,
         optimize_distance=args.optimize_distance,
         ignore_constraints=args.ignore_constraints,
         check_constraints=Coordinate.constraints,

@@ -73,7 +73,7 @@ tour_ani = animation.FuncAnimation(
 )
 
 SAVE = False
-if SAVE == True:
+if SAVE:
     writer = animation.FFMpegWriter(fps=50)
     tour_ani.save(
         "output/branch_and_bound/BnB/tour_ani_new.mp4", writer=writer

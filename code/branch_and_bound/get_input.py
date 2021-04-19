@@ -11,6 +11,8 @@ import random
 ##############################################################################
 # Code
 ##############################################################################
+
+
 def get_input(num_of_nodes, fetch_coordinates=True, seed=0):
     random.seed(seed)
     coordi = np.round(np.random.rand(num_of_nodes, 2) * 10, 1)
