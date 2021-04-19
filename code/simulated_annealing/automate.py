@@ -6,6 +6,7 @@ from automan.api import Simulation, Problem, Automator
 from automan.automation import filter_cases
 import matplotlib.pyplot as plt
 import numpy as np
+from itertools import product
 
 ###########################################################################
 # Code
@@ -83,6 +84,37 @@ class ComplexSimulatedAnnealing(Problem):
         )
         plt.close()
 
+    def _plot_parameter_tuning(
+        self, param_name, param_vals, cases_var, cases_vals, ext=''
+    ):
+        fig, axs = plt.subplots(1, 1, figsize=(12, 6))
+
+        for case_item in cases_vals:
+            final_cost, temp_x = [], []
+            cases_attrs = {cases_var: case_item}
+            for param_item in param_vals:
+                attrs = {param_name: param_item}
+                attrs.update(cases_attrs)
+                cases = filter_cases(self.cases, **attrs)
+                for case in cases:
+                    data = case.data
+                    final_cost.append(data['final_cost'])
+                    temp_x.append(param_item)
+            axs.plot(
+                temp_x, final_cost, label=f'{cases_var}:{case_item}',
+                linewidth=0.85, marker='o'
+            )
+
+        plt.legend()
+        plt.xlabel(f'{param_name}' + r'$\rightarrow$')
+        plt.ylabel(r'Final Cost $\rightarrow$')
+        plt.grid()
+        fig.savefig(
+            self.output_path(ext + f'{param_name}_final_cost.png'),
+            dpi=400, bbox_inches='tight'
+        )
+        plt.close()
+
     def setup(self):
         get_path = self.input_path
 
@@ -90,26 +122,123 @@ class ComplexSimulatedAnnealing(Problem):
         code_name = 'code/simulated_annealing/complex_simulated_annealing.py'
         base_cmd = f'python {code_name} --s --d $output_dir'
 
-        self.epochs = 1000
+        self.epochs, self.n_epochs = 1000, 200
+        self.n = [40, 60, 80]
+        N_param = 10
 
-        # Make cases
+        # T
+        self.T = np.linspace(30, 120, N_param).astype(int)
         self.cases = [
             Simulation(
-                root=get_path(f'e_{self.epochs}_n_{i}'),
+                root=get_path(f'n_{num_nodes}_T_{param}'),
                 job_info=dict(n_core=1, n_thread=1),
                 base_command=base_cmd,
-                n_epoch=i,
+                n_epoch=self.n_epochs,
                 epoch=self.epochs,
-                n=80,
-                T=200,
+                n=num_nodes,
+                T=param,
             )
-            for i in [50, 100, 200, 400]
+            for param, num_nodes in product(self.T, self.n)
         ]
+
+        # Alpha
+        self.alpha = np.round(np.linspace(0.5, 1.5, N_param), 3)
+        cases = [
+            Simulation(
+                root=get_path(f'n_{num_nodes}_alpha_{param}'),
+                job_info=dict(n_core=1, n_thread=1),
+                base_command=base_cmd,
+                n_epoch=self.n_epochs,
+                epoch=self.epochs,
+                n=num_nodes,
+                T=50,
+                alpha=param,
+            )
+            for param, num_nodes in product(self.alpha, self.n)
+        ]
+        self.cases += cases
+
+        # ## k
+        # self.k =
+        # cases = [
+        #     Simulation(
+        #         root=get_path(f'n_{num_nodes}_alpha_{param}'),
+        #         job_info=dict(n_core=1, n_thread=1),
+        #         base_command=base_cmd,
+        #         n_epoch=self.n_epochs,
+        #         epoch=self.epochs,
+        #         n=num_nodes,
+        #         T=,
+        #         alpha=,
+        #         k=param,
+        #     )
+        #     for param, num_nodes in product(self.k, self.n)
+        # ]
+        # self.cases += cases
+
+        # ## Delta
+        # self.delta = #np.linspace(1, 30, N_param).astype(int)
+        # cases = [
+        #     Simulation(
+        #         root=get_path(f'n_{num_nodes}_delta_{param}'),
+        #         job_info=dict(n_core=1, n_thread=1),
+        #         base_command=base_cmd,
+        #         n_epoch=self.n_epochs,
+        #         epoch=self.epochs,
+        #         n=num_nodes,
+        #         T=,
+        #         alpha=,
+        #         k=,
+        #         delta=,
+        #     )
+        #     for param, num_nodes in product(self.delta, self.n)
+        # ]
+        # self.cases += cases
+
+        # ## Lamda
+        # self.lamda = np.round(np.linspace(0.01, 1.5, N_param), 3)
+        # cases = [
+        #     Simulation(
+        #         root=get_path(f'n_{num_nodes}_lamda_{param}'),
+        #         job_info=dict(n_core=1, n_thread=1),
+        #         base_command=base_cmd,
+        #         n_epoch=self.n_epochs,
+        #         epoch=self.epochs,
+        #         n=num_nodes,
+        #         T=,
+        #         alpha=,
+        #         k=,
+        #         delta=,
+        #         lamda=param,
+        #     )
+        #     for param, num_nodes in product(self.lamda, self.n)
+        # ]
+        # self.cases += cases
 
     def run(self):
         self.make_output_dir()
-        self._plot_cost_history(ext='epoch_1000_', epoch=self.epochs)
-        self._plot_runtimes(ext='epoch_1000_', epoch=self.epochs)
+        self._plot_parameter_tuning(
+            param_name='T', param_vals=self.T, cases_var='n',
+            cases_vals=self.n
+        )
+        self._plot_parameter_tuning(
+            param_name='alpha', param_vals=self.alpha, cases_var='n',
+            cases_vals=self.n
+        )
+        # self._plot_parameter_tuning(
+        #     param_name='k', param_vals=self.k, cases_var='n',
+        #     cases_vals=self.n
+        # )
+        # self._plot_parameter_tuning(
+        #     param_name='delta', param_vals=self.delta, cases_var='n',
+        #     cases_vals=self.n
+        # )
+        # self._plot_parameter_tuning(
+        #     param_name='lamda', param_vals=self.lamda, cases_var='n',
+        #     cases_vals=self.n
+        # )
+        # self._plot_cost_history(ext='epoch_1000_', epoch=self.epochs)
+        # self._plot_runtimes(ext='epoch_1000_', epoch=self.epochs)
 
 
 class SimpleSimulatedAnnealing(ComplexSimulatedAnnealing):
@@ -180,7 +309,8 @@ class SimpleSimulatedAnnealing(ComplexSimulatedAnnealing):
 ###########################################################################
 if __name__ == '__main__':
     PROBLEMS = [
-        SimpleSimulatedAnnealing, ComplexSimulatedAnnealing
+        # SimpleSimulatedAnnealing,
+        ComplexSimulatedAnnealing
     ]
     automator = Automator(
         simulation_dir='output/simulated_annealing/automate',

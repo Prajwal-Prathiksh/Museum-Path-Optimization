@@ -26,6 +26,7 @@ class BaseTestCasePSContainer(BaseLibraryFileContainer):
         BaseLibraryFileContainer.__init__(self, file_path)
         self.cost_data_container = {}
         self.constraint_data_container = {}
+        self.additional_data_container = {}
 
     def update_cost_data(self):
         pass
@@ -38,6 +39,9 @@ class BaseTestCasePSContainer(BaseLibraryFileContainer):
 
     def get_constraint_data(self):
         return self.constraint_data_container
+
+    def get_additional_data(self):
+        return self.additional_data_container
 
 
 class BaseOptimalDataContainer(BaseLibraryFileContainer):
