@@ -309,7 +309,6 @@ class Coordinate:
         return initial_coords, initial_solution, S, loc_bar
 
     @staticmethod
-    @njit
     @function_calls
     def satisfaction(data):
         '''
@@ -340,7 +339,7 @@ class Coordinate:
             satisfaction += S[i]
 
         penalty = Coordinate.time_taken(x, coords, velocity) + len(x)
-        return satisfaction - (lamda*penalty)
+        return satisfaction - (lamda * penalty)
 
     @staticmethod
     @function_calls
@@ -553,8 +552,8 @@ class ComplexSimulatedAnnealing:
     '''
 
     def __init__(
-        self, func0, ignore_constraints, check_constraints, coords, x0, 
-        loc_bar, velocity, T_max, S, T0, alpha, epochs, N_per_epochs, delta, k, 
+        self, func0, ignore_constraints, check_constraints, coords, x0,
+        loc_bar, velocity, T_max, S, T0, alpha, epochs, N_per_epochs, delta, k,
         output_dir, cooling_func='simp', ext='', **kwargs
     ):
         '''
@@ -902,7 +901,7 @@ class ComplexSimulatedAnnealing:
 
                 if(
                     self.ignore_constraints or self.check_constraints(
-                        [x_new[:loc_bar_new], coords, velocity, T_max] 
+                        [x_new[:loc_bar_new], coords, velocity, T_max]
                     )
                 ):
                     if cost_new > cost:
