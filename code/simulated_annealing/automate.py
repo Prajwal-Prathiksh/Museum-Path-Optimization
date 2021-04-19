@@ -85,7 +85,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         plt.close()
 
     def _plot_parameter_tuning(
-        self, param_name, param_vals, cases_var, cases_vals, ext='', 
+        self, param_name, param_vals, cases_var, cases_vals, ext='',
         sim_cases=None
     ):
         if sim_cases is None:
@@ -140,7 +140,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
-                t_max=num_nodes*0.25,
+                t_max=num_nodes * 0.25,
                 T=param,
             )
             for param, num_nodes in product(self.T, self.n)
@@ -160,7 +160,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
                 n_epoch=self.n_epochs,
                 epoch=self.epochs,
                 n=num_nodes,
-                t_max=num_nodes*0.25,
+                t_max=num_nodes * 0.25,
                 T=60,
                 alpha=param,
             )
@@ -168,47 +168,47 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         ]
         self.cases += self.cases_alpha
 
-        # ## k
-        # self.k = np.append(
-        #     np.round(np.linspace(0.01, 0.999, N_param), 3), 0.6
-        # )
-        # self.k = np.sort(self.k)
-        # cases = [
-        #     Simulation(
-        #         root=get_path(f'n_{num_nodes}_k_{param}'),
-        #         job_info=dict(n_core=1, n_thread=1),
-        #         base_command=base_cmd,
-        #         n_epoch=self.n_epochs,
-        #         epoch=self.epochs,
-        #         n=num_nodes,
-        #         t_max=num_nodes*0.25,
-        #         T=50,
-        #         alpha=0.944,
-        #         k=param,
-        #     )
-        #     for param, num_nodes in product(self.k, self.n)
-        # ]
-        # self.cases += cases
+        ## k
+        self.k = np.append(
+            np.round(np.linspace(0.01, 0.999, N_param), 3), 0.6
+        )
+        self.k = np.sort(self.k)
+        cases = [
+            Simulation(
+                root=get_path(f'n_{num_nodes}_k_{param}'),
+                job_info=dict(n_core=1, n_thread=1),
+                base_command=base_cmd,
+                n_epoch=self.n_epochs,
+                epoch=self.epochs,
+                n=num_nodes,
+                t_max=num_nodes*0.25,
+                T=60,
+                alpha=0.944,
+                k=param,
+            )
+            for param, num_nodes in product(self.k, self.n)
+        ]
+        self.cases += cases
 
         # ## Delta
-        # self.delta = #np.linspace(1, 30, N_param).astype(int)
-        # cases = [
-        #     Simulation(
-        #         root=get_path(f'n_{num_nodes}_delta_{param}'),
-        #         job_info=dict(n_core=1, n_thread=1),
-        #         base_command=base_cmd,
-        #         n_epoch=self.n_epochs,
-        #         epoch=self.epochs,
-        #         n=num_nodes,
-        #         t_max=num_nodes*0.25,
-        #         T=,
-        #         alpha=,
-        #         k=,
-        #         delta=,
-        #     )
-        #     for param, num_nodes in product(self.delta, self.n)
-        # ]
-        # self.cases += cases
+        self.delta = np.linspace(5, 30, N_param).astype(int)
+        cases = [
+            Simulation(
+                root=get_path(f'n_{num_nodes}_delta_{param}'),
+                job_info=dict(n_core=1, n_thread=1),
+                base_command=base_cmd,
+                n_epoch=self.n_epochs,
+                epoch=self.epochs,
+                n=num_nodes,
+                t_max=num_nodes*0.25,
+                T=60,
+                alpha=0.944,
+                k=0.889,
+                delta=param,
+            )
+            for param, num_nodes in product(self.delta, self.n)
+        ]
+        self.cases += cases
 
         # ## Lamda
         # self.lamda = np.round(np.linspace(0.01, 1.5, N_param), 3)
@@ -241,14 +241,14 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
             param_name='alpha', param_vals=self.alpha, cases_var='n',
             cases_vals=self.n, sim_cases=self.cases_alpha
         )
-        # self._plot_parameter_tuning(
-        #     param_name='k', param_vals=self.k, cases_var='n',
-        #     cases_vals=self.n
-        # )
-        # self._plot_parameter_tuning(
-        #     param_name='delta', param_vals=self.delta, cases_var='n',
-        #     cases_vals=self.n
-        # )
+        self._plot_parameter_tuning(
+            param_name='k', param_vals=self.k, cases_var='n',
+            cases_vals=self.n
+        )
+        self._plot_parameter_tuning(
+            param_name='delta', param_vals=self.delta, cases_var='n',
+            cases_vals=self.n
+        )
         # self._plot_parameter_tuning(
         #     param_name='lamda', param_vals=self.lamda, cases_var='n',
         #     cases_vals=self.n
