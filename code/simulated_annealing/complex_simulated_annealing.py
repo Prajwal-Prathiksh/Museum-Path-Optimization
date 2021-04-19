@@ -94,6 +94,14 @@ def cli_parser():
         default='simp', help='Type of cooling function to be used'
     )
     parser.add_argument(
+        '--mod-cost', action='store_true', dest='modified_cost_func',
+        help='Uses the modified cost function with the travel time penalty'
+    )
+    parser.add_argument(
+        '--ignore-constr', action='store_true', dest='ignore_constraints',
+        help='DOES NOT consider constraints while optimizing the problem'
+    )
+    parser.add_argument(
         '--ext', action='store', dest='ext', type=str,
         default='',
         help='Add a prefix to the plots, summary_data and summary_log '
@@ -331,8 +339,8 @@ class Coordinate:
         for i in x:
             satisfaction += S[i]
 
-        return satisfaction - \
-            lamda * Coordinate.time_taken(x, coords, velocity)
+        penalty = Coordinate.time_taken(x, coords, velocity) + len(x)
+        return satisfaction - (lamda*penalty)
 
     @staticmethod
     @function_calls
@@ -545,9 +553,9 @@ class ComplexSimulatedAnnealing:
     '''
 
     def __init__(
-        self, func0, check_constraints, coords, x0, loc_bar, velocity, T_max,
-        S, T0, alpha, epochs, N_per_epochs, delta, k, output_dir,
-        cooling_func='simp', ext='', **kwargs
+        self, func0, ignore_constraints, check_constraints, coords, x0, 
+        loc_bar, velocity, T_max, S, T0, alpha, epochs, N_per_epochs, delta, k, 
+        output_dir, cooling_func='simp', ext='', **kwargs
     ):
         '''
             Parameters:
@@ -556,6 +564,8 @@ class ComplexSimulatedAnnealing:
                 Cost function to be evaluated
             check_constraints: (Function)
                 Checks that the function obeys the constraints
+            ignore_constraints: (boolean)
+                If True, ignores constraints in the problem
             coords: (List)
                 List of Coordinate instances
             x0: (Array):
@@ -593,6 +603,7 @@ class ComplexSimulatedAnnealing:
         self.output_dir = output_dir
         # Initialize
         self.func0 = func0
+        self.ignore_constraints = ignore_constraints
         self.check_constraints = check_constraints
         self.cost0 = round(self.func0([x0[:loc_bar], S, coords, velocity]), 3)
 
@@ -890,8 +901,8 @@ class ComplexSimulatedAnnealing:
                     [x_new[:loc_bar_new], S, coords, velocity])
 
                 if(
-                    self.check_constraints(
-                        [x_new[:loc_bar_new], coords, velocity, T_max]
+                    self.ignore_constraints or self.check_constraints(
+                        [x_new[:loc_bar_new], coords, velocity, T_max] 
                     )
                 ):
                     if cost_new > cost:
@@ -917,7 +928,7 @@ class ComplexSimulatedAnnealing:
                 if(j >= self.delta):
                     x_new = apply_swap(x, loc_bar)
                     if(
-                        self.check_constraints(
+                        self.ignore_constraints or self.check_constraints(
                             [x_new[:loc_bar], coords, velocity, T_max]
                         )
                     ):
@@ -990,7 +1001,7 @@ class ComplexSimulatedAnnealing:
                 time_taken(final_x[:final_loc_bar], coords, velocity), 1
             )
             final_sl = 0
-            for i in final_x:
+            for i in final_x[:final_loc_bar]:
                 final_sl += self.S[i]
             printing(f'\nNode visited in optimized solution: {final_loc_bar}')
             printing(f'Travel time of optimized solution: {final_t}')
@@ -1085,9 +1096,14 @@ if __name__ == '__main__':
     cfunc = args.cfunc
 
     # Set up Simulated Annealing Class
-    func0 = Coordinate.satisfaction_with_time_penalty
+    if args.modified_cost_func is True:
+        func0 = Coordinate.satisfaction_with_time_penalty
+    else:
+        func0 = Coordinate.satisfaction
+
     optim_solution = ComplexSimulatedAnnealing(
         func0=func0,
+        ignore_constraints=args.ignore_constraints,
         check_constraints=Coordinate.constraints,
         coords=initial_coords,
         x0=initial_solution,
