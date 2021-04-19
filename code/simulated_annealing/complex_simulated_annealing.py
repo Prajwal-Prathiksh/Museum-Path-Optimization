@@ -706,7 +706,7 @@ class ComplexSimulatedAnnealing:
         )
 
         self.increase_in_cost = round(
-            np.abs(1 - self.cost0 / self.final_cost) * 100, 3
+            np.abs(1 - self.final_cost / self.cost0) * 100, 3
         )
 
         self.func0_calls = self.func0.calls

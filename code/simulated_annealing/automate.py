@@ -173,7 +173,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
             np.round(np.linspace(0.01, 0.999, N_param), 3), 0.6
         )
         self.k = np.sort(self.k)
-        cases = [
+        self.cases_k = [
             Simulation(
                 root=get_path(f'n_{num_nodes}_k_{param}'),
                 job_info=dict(n_core=1, n_thread=1),
@@ -188,11 +188,11 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
             )
             for param, num_nodes in product(self.k, self.n)
         ]
-        self.cases += cases
+        self.cases += self.cases_k
 
-        # ## Delta
+        ## Delta
         self.delta = np.linspace(5, 30, N_param).astype(int)
-        cases = [
+        self.cases_delta = [
             Simulation(
                 root=get_path(f'n_{num_nodes}_delta_{param}'),
                 job_info=dict(n_core=1, n_thread=1),
@@ -208,28 +208,56 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
             )
             for param, num_nodes in product(self.delta, self.n)
         ]
-        self.cases += cases
+        self.cases += self.cases_delta
 
-        # ## Lamda
-        # self.lamda = np.round(np.linspace(0.01, 1.5, N_param), 3)
-        # cases = [
-        #     Simulation(
-        #         root=get_path(f'n_{num_nodes}_lamda_{param}'),
-        #         job_info=dict(n_core=1, n_thread=1),
-        #         base_command=base_cmd,
-        #         n_epoch=self.n_epochs,
-        #         epoch=self.epochs,
-        #         n=num_nodes,
-        #         t_max=num_nodes*0.25,
-        #         T=,
-        #         alpha=,
-        #         k=,
-        #         delta=,
-        #         lamda=param,
-        #     )
-        #     for param, num_nodes in product(self.lamda, self.n)
-        # ]
-        # self.cases += cases
+        ## Lamda - With constraints
+        self.lamda = np.append(
+            np.round(np.linspace(0.01, 15, N_param), 3), 0.5
+        )
+        self.lamda = np.sort(self.lamda)
+        self.cases_lamda = [
+            Simulation(
+                root=get_path(f'n_{num_nodes}_lamda_{param}'),
+                job_info=dict(n_core=1, n_thread=1),
+                base_command=base_cmd,
+                n_epoch=self.n_epochs,
+                epoch=self.epochs,
+                n=num_nodes,
+                t_max=num_nodes*0.25,
+                T=60,
+                alpha=0.944,
+                k=0.889,
+                delta=21,
+                lamda=param,
+            )
+            for param, num_nodes in product(self.lamda, self.n)
+        ]
+        self.cases += self.cases_lamda
+
+        ## Lamda - Without constraints
+        self.lamda = np.append(
+            np.round(np.linspace(0.01, 8, N_param), 3), 0.5
+        )
+        self.lamda = np.sort(self.lamda)
+        self.cases_lamda_no_const = [
+            Simulation(
+                root=get_path(f'n_{num_nodes}_lamda_{param}_no_constr'),
+                job_info=dict(n_core=1, n_thread=1),
+                base_command=f'{base_cmd} --optim-dist',
+                n_epoch=self.n_epochs,
+                epoch=self.epochs,
+                n=num_nodes,
+                t_max=num_nodes*0.25,
+                T=60,
+                alpha=0.944,
+                k=0.889,
+                delta=21,
+                ignore_constr=None,
+                lamda=param,
+            )
+            for param, num_nodes in product(self.lamda, self.n)
+        ]
+        self.cases += self.cases_lamda_no_const
 
     def run(self):
         self.make_output_dir()
@@ -243,16 +271,21 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         )
         self._plot_parameter_tuning(
             param_name='k', param_vals=self.k, cases_var='n',
-            cases_vals=self.n
+            cases_vals=self.n, sim_cases=self.cases_k
         )
         self._plot_parameter_tuning(
             param_name='delta', param_vals=self.delta, cases_var='n',
-            cases_vals=self.n
+            cases_vals=self.n, sim_cases=self.cases_delta
         )
-        # self._plot_parameter_tuning(
-        #     param_name='lamda', param_vals=self.lamda, cases_var='n',
-        #     cases_vals=self.n
-        # )
+        self._plot_parameter_tuning(
+            param_name='lamda', param_vals=self.lamda, cases_var='n',
+            cases_vals=self.n, sim_cases=self.cases_lamda
+        )
+        self._plot_parameter_tuning(
+            param_name='lamda', param_vals=self.lamda, cases_var='n',
+            cases_vals=self.n, sim_cases=self.cases_lamda_no_const,
+            ext='no_constr_'
+        )
         # self._plot_cost_history(ext='epoch_1000_', epoch=self.epochs)
         # self._plot_runtimes(ext='epoch_1000_', epoch=self.epochs)
 
