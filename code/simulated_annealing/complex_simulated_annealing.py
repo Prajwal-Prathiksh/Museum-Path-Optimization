@@ -952,7 +952,7 @@ class ComplexSimulatedAnnealing:
 
         i = 0
         j = 0
-        np.random.seed(int(time.time))  # Reset seed
+        np.random.seed(int(time.time()))  # Reset seed
 
         cost_hist = []
         tic = time.monotonic()

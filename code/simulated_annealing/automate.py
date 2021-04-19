@@ -235,10 +235,10 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
         self.cases += self.cases_lamda
 
         # Lamda - Without constraints
-        self.lamda = np.append(
+        self.lamda_no_constr = np.append(
             np.round(np.linspace(0.01, 6, N_param), 3), 0.5
         )
-        self.lamda = np.sort(self.lamda)
+        self.lamda_no_constr = np.sort(self.lamda_no_constr)
         self.cases_lamda_no_const = [
             Simulation(
                 root=get_path(f'n_{num_nodes}_lamda_{param}_no_constr'),
@@ -255,7 +255,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
                 ignore_constr=None,
                 lamda=param,
             )
-            for param, num_nodes in product(self.lamda, self.n)
+            for param, num_nodes in product(self.lamda_no_constr, self.n)
         ]
         self.cases += self.cases_lamda_no_const
 
@@ -282,7 +282,7 @@ class ComplexSimulatedAnnealingParamTuning(Problem):
             cases_vals=self.n, sim_cases=self.cases_lamda
         )
         self._plot_parameter_tuning(
-            param_name='lamda', param_vals=self.lamda, cases_var='n',
+            param_name='lamda', param_vals=self.lamda_no_constr, cases_var='n',
             cases_vals=self.n, sim_cases=self.cases_lamda_no_const,
             ext='no_constr_'
         )
