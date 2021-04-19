@@ -59,15 +59,15 @@ def cli_parser():
     )
     parser.add_argument(
         '--delta', action='store', dest='delta', type=int,
-        default=10, help='Number of iterations after which solution is shaken'
+        default=21, help='Number of iterations after which solution is shaken'
     )
     parser.add_argument(
         '--T', action='store', dest='T', type=float,
-        default=40, help='Inital temperature'
+        default=60, help='Inital temperature'
     )
     parser.add_argument(
         '--alpha', action='store', dest='alpha', type=float,
-        default=0.99, help='Cooling factor'
+        default=0.944, help='Cooling factor'
     )
     parser.add_argument(
         '--lamda', action='store', dest='lamda', type=float,
@@ -83,7 +83,11 @@ def cli_parser():
     )
     parser.add_argument(
         '--k', action='store', dest='k', type=float,
-        default=0.6, help='Probability of increasing the exhibits visited'
+        default=0.889, help='Probability of increasing the exhibits visited'
+    )
+    parser.add_argument(
+        '--seed', action='store', dest='seed', type=int,
+        default=int(time.time()), help='Seed'
     )
     parser.add_argument(
         '--s', action='store_true', dest='SAVE',
@@ -948,7 +952,7 @@ class ComplexSimulatedAnnealing:
 
         i = 0
         j = 0
-        np.random.seed()  # Reset seed
+        np.random.seed(int(time.time))  # Reset seed
 
         cost_hist = []
         tic = time.monotonic()
@@ -1210,7 +1214,7 @@ if __name__ == '__main__':
     lamda = args.lamda
 
     feasible_solution = Coordinate.get_feasible_solution(
-        n, velocity, T_max, seed=1, low=0, high=11
+        n, velocity, T_max, seed=args.seed, low=0, high=11
     )
 
     initial_coords, initial_solution, S, loc_bar = feasible_solution
