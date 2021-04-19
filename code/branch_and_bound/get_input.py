@@ -21,8 +21,8 @@ def get_input(num_of_nodes, fetch_coordinates=True, seed=0):
     for i in range(num_of_nodes):
         for j in range(num_of_nodes):
             cost_matrix[i, j] = np.sqrt(
-                (coordi[i, 0] - coordi[j, 0]) ** 2
-                + (coordi[i, 1] - coordi[j, 1]) ** 2
+                (coordi[i, 0] - coordi[j, 0]) ** 2 +
+                (coordi[i, 1] - coordi[j, 1]) ** 2
             )
 
     if fetch_coordinates:
