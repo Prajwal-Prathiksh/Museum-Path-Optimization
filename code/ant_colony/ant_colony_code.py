@@ -242,7 +242,8 @@ plt.show()
 
 # #This Cij obtained should be used in the above code first
 
-# #After we have run our main code with this Cij, we can plot colormaps for Pheromone and Visbility
+# After we have run our main code with this Cij, we can plot colormaps for 
+# Pheromone and Visbility
 
 # plt.scatter(x, y)
 # print(Cij)
@@ -255,7 +256,10 @@ plt.show()
 #   x1[j] = x[best_route[j]-1]
 #   y1[j] = y[best_route[j]-1]
 # #plt.plot(x1,y1)
-# plt.quiver(x1[:-1], y1[:-1], x1[1:]-x1[:-1], y1[1:]-y1[:-1], scale_units='xy', angles='xy', scale=1)
+# plt.quiver(
+#   x1[:-1], y1[:-1], x1[1:]-x1[:-1], y1[1:]-y1[:-1], scale_units='xy', 
+#   angles='xy', scale=1
+# )
 # plt.annotate("Entry/Exit", (x1[0], y1[0]))
 # plt.xlim(-5,95)
 # plt.scatter(x,y)
@@ -265,7 +269,9 @@ plt.show()
 # #Above code plots the path
 
 # import matplotlib.colors as col
-# matrix = 1000*pheromne         #multiplied with 1000 because otherwise only one very light color was showing in colormap
+# multiplied with 1000 because otherwise only one very light color was 
+# showing in colormap
+# matrix = 1000*pheromne        
 # minima = np.array(matrix).min()
 # maxima = np.array(matrix).max()
 
