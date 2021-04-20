@@ -77,12 +77,12 @@ def selection(popRanked, eliteSize):
     selectionResults = []
     df = pd.DataFrame(np.array(popRanked), columns=["Index", "Fitness"])
     df['cum_sum'] = df.Fitness.cumsum()
-    df['cum_perc'] = 100*df.cum_sum/df.Fitness.sum()
+    df['cum_perc'] = 100 * df.cum_sum / df.Fitness.sum()
 
     for i in range(0, eliteSize):
         selectionResults.append(popRanked[i][0])
     for i in range(0, len(popRanked) - eliteSize):
-        pick = 100*random.random()
+        pick = 100 * random.random()
         for i in range(0, len(popRanked)):
             if pick <= df.iat[i, 3]:
                 selectionResults.append(popRanked[i][0])
@@ -127,7 +127,7 @@ def breedPopulation(matingpool, eliteSize):
         children.append(matingpool[i])
 
     for i in range(0, length):
-        child = breed(pool[i], pool[len(matingpool)-i-1])
+        child = breed(pool[i], pool[len(matingpool) - i - 1])
         children.append(child)
     return children
 
@@ -194,8 +194,8 @@ if __name__ == '__main__':
     COST_MATRIX = [[0 for i in range(cityNumber)] for j in range(cityNumber)]
     for i in range(cityNumber - 1):
         COST_MATRIX[i][i] = np.inf
-        for j in range(i+1, cityNumber):
-            x = int(1 + random.random()*9)
+        for j in range(i + 1, cityNumber):
+            x = int(1 + random.random() * 9)
             COST_MATRIX[i][j] = x
             COST_MATRIX[j][i] = x
     data = np.load('bier127_data.npz')

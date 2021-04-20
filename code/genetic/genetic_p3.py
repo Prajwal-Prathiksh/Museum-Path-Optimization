@@ -75,12 +75,12 @@ def selection(popRanked, eliteSize):
     selectionResults = []
     df = pd.DataFrame(np.array(popRanked), columns=["Index", "Fitness"])
     df['cum_sum'] = df.Fitness.cumsum()
-    df['cum_perc'] = 100*df.cum_sum/df.Fitness.sum()
+    df['cum_perc'] = 100 * df.cum_sum / df.Fitness.sum()
 
     for i in range(0, eliteSize):
         selectionResults.append(popRanked[i][0])
     for i in range(0, len(popRanked) - eliteSize):
-        pick = 100*random.random()
+        pick = 100 * random.random()
         for i in range(0, len(popRanked)):
             if pick <= df.iat[i, 3]:
                 selectionResults.append(popRanked[i][0])
@@ -146,7 +146,7 @@ def breedPopulation(matingpool, eliteSize, node_set, constraint_fn):
     cnt = 0
     while cnt < length:
         # print(pool)
-        child = breed(pool[i], pool[len(matingpool)-i-1], node_set)
+        child = breed(pool[i], pool[len(matingpool) - i - 1], node_set)
         if constraint_fn(child):
             cnt += 1
             children.append(child)
@@ -160,7 +160,7 @@ def size_change_mut(individual, node_set, mutationRate):
             rem_nds = [
                 nod for nod in node_set.node_list if nod not in individual]
             new_node = random.choice(rem_nds)
-            new_pos = random.choice(range(len(individual)+1))
+            new_pos = random.choice(range(len(individual) + 1))
             individual = individual[:new_pos] + \
                 [new_node] + individual[new_pos:]
         elif not chance and len(individual) > 2:
@@ -258,8 +258,9 @@ def geneticAlgorithm(init_population, popSize, eliteSize, node_set, cost_fn,
 
 
 def cr_const_fn(velocity, T_max, node_set):
-    def fn(nodes): return Coordinate.constraints([[nod.id for nod in nodes], [
-        nod.coords for nod in node_set.node_list], velocity, T_max])
+    def fn(nodes):
+        return Coordinate.constraints([[nod.id for nod in nodes], [
+            nod.coords for nod in node_set.node_list], velocity, T_max])
     return fn
 
 
