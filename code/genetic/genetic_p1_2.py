@@ -1,9 +1,11 @@
+import __init__
 import numpy as np
+import time
 import random
 import operator
 import pandas as pd
 import matplotlib.pyplot as plt
-import tensorflow as tf
+from code.data_input.input_final import get_input_loader
 
 
 class City:
@@ -163,8 +165,11 @@ def nextGeneration(currentGen, eliteSize, mutationRate):
     return nextGeneration
 
 
-def geneticAlgorithm(population, popSize, eliteSize, mutationRate,
-                     generations):
+def geneticAlgorithm(
+    population, popSize, eliteSize, mutationRate,generations
+):
+    tic = time.monotonic()
+
     pop = initialPopulation(popSize, population)
     progress = []
     progress.append(1 / rankRoutes(pop)[0][1])
@@ -172,9 +177,16 @@ def geneticAlgorithm(population, popSize, eliteSize, mutationRate,
 
     for i in range(0, generations):
         pop = nextGeneration(pop, eliteSize, mutationRate)
-        progress.append(1 / rankRoutes(pop)[0][1])
+        temp = 1 / rankRoutes(pop)[0][1]
 
-    print("Final distance: " + str(1 / rankRoutes(pop)[0][1]))
+        print(f"Gen: {i} | Progress: {round(temp, 2)}", end='\r')
+        progress.append(temp)
+
+    print("\n\nFinal distance: " + str(1 / rankRoutes(pop)[0][1]))
+    toc = time.monotonic()
+    rt = toc - tic
+    print(f'Runtime : {round(rt, 3)}')
+
     bestRouteIndex = rankRoutes(pop)[0][0]
     bestRoute = pop[bestRouteIndex]
     plt.plot(progress)
@@ -185,7 +197,20 @@ def geneticAlgorithm(population, popSize, eliteSize, mutationRate,
 
 
 if __name__ == '__main__':
-    cityNumber = 127
+
+    tc_sym = 'asym'
+    tc_number = 2
+
+    if tc_sym == 'sym':
+        tc_fname = 'Choose_TC_Sym_NPZ.txt'
+    elif tc_sym == 'asym':
+        tc_fname = 'Choose_TC_Asym_NPZ.txt'
+
+    loader = get_input_loader(tc_fname, False)
+    tc_name = loader.get_test_case_name(tc_number)
+    cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()    
+    
+    cityNumber = np.shape(cost_matrix)[0]
     cityList = []
     for i in range(0, cityNumber):
         cityList.append(City(x=int(random.random() * 200),
@@ -198,9 +223,13 @@ if __name__ == '__main__':
             x = int(1 + random.random() * 9)
             COST_MATRIX[i][j] = x
             COST_MATRIX[j][i] = x
-    data = np.load('bier127_data.npz')
-    # In [52]: list(data.keys())
-    COST_MATRIX = data['cost_matrix']
 
-geneticAlgorithm(population=cityList, popSize=150,
-                 eliteSize=15, mutationRate=0.02, generations=20000)
+    COST_MATRIX = cost_matrix # data['cost_matrix']
+
+geneticAlgorithm(
+    population=cityList, 
+    popSize=150,
+    eliteSize=15,
+    mutationRate=0.02,
+    generations=200
+)
