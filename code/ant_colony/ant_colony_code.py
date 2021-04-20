@@ -225,3 +225,91 @@ plt.ylabel("optimal cost")
 plt.title("Optimal Cost vs Number of iterations (varying number of ants)")
 plt.legend(["m=10", "m=20", "m=30", "m=40"])
 plt.show()
+
+# #Below is the code for plotting coordinates and creating colormap
+
+# ##First we will create a random set of points, and plot them
+# z = 12 #number of nodes wanted
+
+# x = 100*np.random.rand(z)
+# y = 100*np.random.rand(z)
+
+# Cij = np.zeros([z,z])
+
+# for i in range(z):
+#   for j in range(z):
+#     Cij[i,j] = ((x[i]-x[j])**2 + (y[i]-y[j])**2)**0.5
+
+# #This Cij obtained should be used in the above code first
+
+# After we have run our main code with this Cij, we can plot colormaps for
+# Pheromone and Visbility
+
+# plt.scatter(x, y)
+# print(Cij)
+
+# x1 = np.zeros(len(x)+1)
+# y1 = np.zeros(len(x)+1)
+# print(best_route)
+# best_route = np.array([int(j) for j in best_route])
+# for j in range(len(x)+1):
+#   x1[j] = x[best_route[j]-1]
+#   y1[j] = y[best_route[j]-1]
+# #plt.plot(x1,y1)
+# plt.quiver(
+#     x1[:-1], y1[:-1], x1[1:] - x1[:-1], y1[1:] - y1[:-1], scale_units='xy',
+#     angles='xy', scale=1
+# )
+# plt.annotate("Entry/Exit", (x1[0], y1[0]))
+# plt.xlim(-5,95)
+# plt.scatter(x,y)
+# plt.title("Best Route")
+# plt.show()
+
+# #Above code plots the path
+
+# import matplotlib.colors as col
+# multiplied with 1000 because otherwise only one very light color was
+# showing in colormap
+# matrix = 1000*pheromne
+# minima = np.array(matrix).min()
+# maxima = np.array(matrix).max()
+
+# norm = col.Normalize(vmin=minima, vmax=maxima, clip=True)
+
+# colors = (plt.cm.YlOrRd(matrix))
+
+# for d in range(z):
+#   for e in range(z):
+#     plt.plot([x[d],x[e]], [y[d],y[e]], color = colors[d,e])
+
+# plt.scatter(x,y, c = 'b', s = 65)
+# plt.title('Pheromone Levels')
+# plt.xlim(-5,80)
+# plt.show()
+
+# #Above code prints pheromone levels
+
+# visibility = 1/Cij
+# visibility[visibility == inf] = 0
+
+# multiplied with 20 because otherwise only one very light color was showing
+# in colormap
+# matrix = 20*visibility
+# minima = np.array(matrix).min()
+# maxima = np.array(matrix).max()
+
+# norm = col.Normalize(vmin=minima, vmax=maxima, clip=True)
+
+# colors = (plt.cm.YlGnBu(matrix))
+
+# for d in range(z):
+#   for e in range(z):
+#     plt.plot([x[d],x[e]], [y[d],y[e]], color = colors[d,e])
+
+# plt.scatter(x,y, c = 'r', s = 65)
+# plt.title('Visibility')
+# plt.xlim(-5,80)
+# plt.show()
+
+# #This code plots visibilty

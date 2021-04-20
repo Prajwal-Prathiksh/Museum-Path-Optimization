@@ -6,8 +6,8 @@
     - [Data Input](#data-input)
     - [Branch and Bound](#branch-and-bound)
     - [Ant Colony Optimization](#ant-colony-optimization)
+    - [Genetic Algorithm](#genetic-algorithm)
     - [Simulated Annealing](#simulated-annealing)
-  - [Project Tree](#project-tree)
 
 ## Group Members
 *In alphabetical order:*
@@ -45,6 +45,20 @@ To run the ant colony optimization algorithm, do the following from root:
 $ python code\ant_colony\ant_colony_code.py
 ```
 
+### Genetic Algorithm
+**Simple Algorithm**
+To run the simple genetic algorithm, do the following from root:
+```
+$ python code\genetic\genetic_p1_2.py
+```
+
+**Complex Algorithm**
+
+To run the complex genetic algorithm, do the following from root:
+```
+$ python code\genetic\genetic_p3.py
+```
+
 ### Simulated Annealing
 
 **Simple Algorithm**
@@ -66,20 +80,4 @@ $ python code/simulated_annealing/complex_simulated_annealing.py
 To run the automator file, do the following from root:
 ```
 $ python code\simulated_annealing\automate.py
-```
-
-## Project Tree
-```
-.
-├───code
-│   ├───ant_colony
-│   ├───branch_and_bound
-│   ├───data_input
-│   ├───genetic
-│   └───simulated_annealing
-├───data
-│   ├───cost_matrices
-│   └───Symmetric_TSPLIB
-├───output
-└───reports
 ```

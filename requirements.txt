@@ -1,6 +1,5 @@
-copy
+automan==0.5.dev0
+matplotlib==3.3.4
+numba==0.53.0
 numpy
-numba
-matplotlib
-queue.PriorityQueue
-https://github.com/pypr/automan/zipball/master
+pandas
