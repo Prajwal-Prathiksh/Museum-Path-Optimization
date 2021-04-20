@@ -1,6 +1,7 @@
 TSPLIB_NPZ
 SYM
 burma14
-bayg29
-bays29
-a280
+att48
+berlin52
+bier127
+brg180

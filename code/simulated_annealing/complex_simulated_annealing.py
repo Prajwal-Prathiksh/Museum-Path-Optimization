@@ -59,15 +59,15 @@ def cli_parser():
     )
     parser.add_argument(
         '--delta', action='store', dest='delta', type=int,
-        default=10, help='Number of iterations after which solution is shaken'
+        default=21, help='Number of iterations after which solution is shaken'
     )
     parser.add_argument(
         '--T', action='store', dest='T', type=float,
-        default=40, help='Inital temperature'
+        default=60, help='Inital temperature'
     )
     parser.add_argument(
         '--alpha', action='store', dest='alpha', type=float,
-        default=0.99, help='Cooling factor'
+        default=0.944, help='Cooling factor'
     )
     parser.add_argument(
         '--lamda', action='store', dest='lamda', type=float,
@@ -83,7 +83,11 @@ def cli_parser():
     )
     parser.add_argument(
         '--k', action='store', dest='k', type=float,
-        default=0.6, help='Probability of increasing the exhibits visited'
+        default=0.889, help='Probability of increasing the exhibits visited'
+    )
+    parser.add_argument(
+        '--seed', action='store', dest='seed', type=int,
+        default=int(time.time()), help='Seed'
     )
     parser.add_argument(
         '--s', action='store_true', dest='SAVE',
@@ -558,6 +562,106 @@ class Coordinate:
             plt.savefig(fname, dpi=400, bbox_inches='tight')
             print(f'\nPlot saved at: {fname}')
 
+    @staticmethod
+    def plot_histogram_exhibits(
+        func0, initial_coords, initial_solution, loc_bar, final_solution,
+        final_loc_bar, S, velocity, T_max, output_dir, ext='', save=False,
+    ):
+        '''
+            Plots the histogram of the solution.
+
+            Parameters:
+            -----------
+            initial_coords: (List)
+                Inital list of Coordinate instances
+            initial_solution: (List)
+                List of Indices
+            loc_bar: (int)
+                Initial location of bar, number of exhibits visited
+            final_solution: (List)
+                List of final indices
+            final_loc_bar: (int)
+                Final location of bar, number of exhibits visited
+            S: (List)
+                Array of satisfaction level of each exhibit in the Muesuem
+            T_max: (float)
+                Maximum time the tourist can spend in the museum (in s)
+            output_dir: (string)
+                Absolute path of the output directory
+            ext: (string), default=''
+                Add a prefix to the plot before saving it
+            save = (Boolean), default=True
+                If True, saves the plot
+
+            Returns:
+            --------
+            Plot
+        '''
+        fig = plt.figure(figsize=(16, 6))
+        ax1 = fig.add_subplot(121)
+        ax2 = fig.add_subplot(122)
+        bins = 3
+        cm = plt.cm.get_cmap('jet', bins)
+
+        # Initial Solution
+        initial_S_array = []
+        for item in initial_solution[:loc_bar]:
+            initial_S_array.append(S[item])
+
+        n, bins, patches = ax1.hist(initial_S_array, bins)
+        bin_centers = 0.5 * (bins[:-1] + bins[1:])
+
+        # scale values to interval [0,1]
+        col = bin_centers - min(bin_centers)
+        col /= max(col)
+
+        for c, p in zip(col, patches):
+            plt.setp(p, 'facecolor', cm(c))
+
+        # Final Solution
+        final_S_array = []
+        for item in final_solution[:final_loc_bar]:
+            final_S_array.append(S[item])
+
+        n, bins, patches = ax2.hist(final_S_array, bins)
+        bin_centers = 0.5 * (bins[:-1] + bins[1:])
+
+        # scale values to interval [0,1]
+        col = bin_centers - min(bin_centers)
+        col /= max(col)
+
+        ymin, ymax = ax2.get_ylim()
+        ax1.set_ylim(ymin=ymin, ymax=ymax)
+
+        for c, p in zip(col, patches):
+            plt.setp(p, 'facecolor', cm(c))
+
+        old_cost = round(
+            func0(
+                [initial_solution[:loc_bar], S, initial_coords, velocity,
+                 T_max]), 2
+        )
+        new_cost = round(
+            func0(
+                [final_solution[:final_loc_bar], S, initial_coords, velocity,
+                 T_max]
+            ), 2
+        )
+
+        ax1.title.set_text(f'Initial Solution | Cost = {old_cost}')
+        ax2.title.set_text(f'Optimized Solution | Cost = {new_cost}')
+
+        ax1.set_xlabel(r'Satisfaction Index $\rightarrow$')
+        ax2.set_xlabel(r'Satisfaction Index $\rightarrow$')
+        ax1.set_ylabel(r'Occurances $\rightarrow$')
+
+        if save:
+            fname = os.path.join(
+                output_dir, f'{ext}CSA_histogram.png'
+            )
+            plt.savefig(fname, dpi=400, bbox_inches='tight')
+            print(f'\nPlot saved at: {fname}')
+
 
 class ComplexSimulatedAnnealing:
     '''
@@ -948,7 +1052,7 @@ class ComplexSimulatedAnnealing:
 
         i = 0
         j = 0
-        np.random.seed()  # Reset seed
+        np.random.seed(int(time.time()))  # Reset seed
 
         cost_hist = []
         tic = time.monotonic()
@@ -1037,17 +1141,26 @@ class ComplexSimulatedAnnealing:
         cost0 = self.func1(x, self.coords)
         T = self.T0
         len_x = len(x)
+        print('\n\n\nRun Distance Minimization:\n')
 
         for epoch in range(self.epochs):
             # Store history of cost
 
-            print(f'Epoch: {epoch} | Cost = {round(cost0, 3)}', end='\r')
-
-            T = self.cooling_func(T, self.alpha, epoch)
+            print(
+                f'Epoch: {epoch} | t = {round(cost0, 3)}' +
+                f' | t_max = {self.T_max}', end='\r'
+            )
 
             for i in range(self.N_per_epochs):
                 # Exchange two elements and get a new neighbour solution
                 e1, e2 = np.random.randint(0, len_x, size=2)
+
+                if np.random.uniform() <= 0.25:
+                    if e2 == 0:
+                        e1 = len_x - 1
+                    else:
+                        e1 = e2 - 1
+
                 temp = x[e1]
                 x[e1] = x[e2]
                 x[e2] = temp
@@ -1065,6 +1178,8 @@ class ComplexSimulatedAnnealing:
                         temp = x[e1]
                         x[e1] = x[e2]
                         x[e2] = temp
+
+            T = self.cooling_func(T, self.alpha, epoch)
 
         return x
 
@@ -1210,7 +1325,7 @@ if __name__ == '__main__':
     lamda = args.lamda
 
     feasible_solution = Coordinate.get_feasible_solution(
-        n, velocity, T_max, seed=1, low=0, high=11
+        n, velocity, T_max, seed=args.seed, low=0, high=11
     )
 
     initial_coords, initial_solution, S, loc_bar = feasible_solution
@@ -1252,6 +1367,20 @@ if __name__ == '__main__':
     optim_solution.solver_summary(save=SAVE)
     optim_solution.plot_cost_hist(save=SAVE)
     Coordinate.plot_solution(
+        func0=func0,
+        initial_coords=initial_coords,
+        initial_solution=initial_solution,
+        loc_bar=loc_bar,
+        final_solution=optim_solution.final_x,
+        final_loc_bar=optim_solution.final_loc_bar,
+        S=S,
+        T_max=T_max,
+        velocity=velocity,
+        ext=ext,
+        save=SAVE,
+        output_dir=output_dir
+    )
+    Coordinate.plot_histogram_exhibits(
         func0=func0,
         initial_coords=initial_coords,
         initial_solution=initial_solution,
