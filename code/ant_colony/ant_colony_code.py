@@ -287,7 +287,9 @@ plt.show()
 # visibility = 1/Cij
 # visibility[visibility == inf] = 0
 
-# matrix = 20*visibility          #multiplied with 20 because otherwise only one very light color was showing in colormap
+# multiplied with 20 because otherwise only one very light color was showing
+# in colormap
+# matrix = 20*visibility
 # minima = np.array(matrix).min()
 # maxima = np.array(matrix).max()
 

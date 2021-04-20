@@ -166,7 +166,7 @@ def nextGeneration(currentGen, eliteSize, mutationRate):
 
 
 def geneticAlgorithm(
-    population, popSize, eliteSize, mutationRate,generations
+    population, popSize, eliteSize, mutationRate, generations
 ):
     tic = time.monotonic()
 
@@ -208,8 +208,8 @@ if __name__ == '__main__':
 
     loader = get_input_loader(tc_fname, False)
     tc_name = loader.get_test_case_name(tc_number)
-    cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()    
-    
+    cost_matrix = loader.get_input_test_case(tc_number).get_cost_matrix()
+
     cityNumber = np.shape(cost_matrix)[0]
     cityList = []
     for i in range(0, cityNumber):
@@ -224,10 +224,10 @@ if __name__ == '__main__':
             COST_MATRIX[i][j] = x
             COST_MATRIX[j][i] = x
 
-    COST_MATRIX = cost_matrix # data['cost_matrix']
+    COST_MATRIX = cost_matrix  # data['cost_matrix']
 
 geneticAlgorithm(
-    population=cityList, 
+    population=cityList,
     popSize=150,
     eliteSize=15,
     mutationRate=0.02,
