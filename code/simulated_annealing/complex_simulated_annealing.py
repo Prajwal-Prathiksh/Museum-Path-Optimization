@@ -600,7 +600,7 @@ class Coordinate:
         fig = plt.figure(figsize=(16, 6))
         ax1 = fig.add_subplot(121)
         ax2 = fig.add_subplot(122)
-        bins = 3 
+        bins = 3
         cm = plt.cm.get_cmap('jet', bins)
 
         # Initial Solution
@@ -629,11 +629,9 @@ class Coordinate:
         # scale values to interval [0,1]
         col = bin_centers - min(bin_centers)
         col /= max(col)
-        
-        
+
         ymin, ymax = ax2.get_ylim()
         ax1.set_ylim(ymin=ymin, ymax=ymax)
-
 
         for c, p in zip(col, patches):
             plt.setp(p, 'facecolor', cm(c))
@@ -1156,7 +1154,7 @@ class ComplexSimulatedAnnealing:
             for i in range(self.N_per_epochs):
                 # Exchange two elements and get a new neighbour solution
                 e1, e2 = np.random.randint(0, len_x, size=2)
-                
+
                 if np.random.uniform() <= 0.25:
                     if e2 == 0:
                         e1 = len_x - 1
@@ -1180,7 +1178,7 @@ class ComplexSimulatedAnnealing:
                         temp = x[e1]
                         x[e1] = x[e2]
                         x[e2] = temp
-            
+
             T = self.cooling_func(T, self.alpha, epoch)
 
         return x
