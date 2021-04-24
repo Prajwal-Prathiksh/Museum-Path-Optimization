@@ -231,5 +231,5 @@ geneticAlgorithm(
     popSize=71,
     eliteSize=9,
     mutationRate=0.002,
-    generations=200 #1500
+    generations=200  # 1500
 )
