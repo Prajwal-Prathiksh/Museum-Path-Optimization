@@ -6,6 +6,8 @@
 
 K T Prajwal Prathiksh, Apurva Kulkarni, Arsh Khan, Harshal Kataria, Miloni Atal, Mridul Agarwal, Patel Joy Pravin Kumar, Nakul Randad, Souvik Kumar Dolui, and Umang Goel. “The Museum Optimization Problem”. Zenodo, April 24, 2021. doi:10.5281/zenodo.4717673.
 
+---
+
 
 - [Museum-Path-Optimization](#museum-path-optimization)
   - [Group Members](#group-members)
@@ -15,6 +17,9 @@ K T Prajwal Prathiksh, Apurva Kulkarni, Arsh Khan, Harshal Kataria, Miloni Atal,
     - [Ant Colony Optimization](#ant-colony-optimization)
     - [Genetic Algorithm](#genetic-algorithm)
     - [Simulated Annealing](#simulated-annealing)
+
+
+---
 
 ## Group Members
 *In alphabetical order:*
