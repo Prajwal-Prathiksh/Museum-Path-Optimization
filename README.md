@@ -1,6 +1,11 @@
 # Museum-Path-Optimization
 
-[![DOI](https://zenodo.org/badge/346058368.svg)](https://zenodo.org/badge/latestdoi/346058368)
+**Citation**
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4717673.svg)](https://doi.org/10.5281/zenodo.4717673)
+
+K T Prajwal Prathiksh, Apurva Kulkarni, Arsh Khan, Harshal Kataria, Miloni Atal, Mridul Agarwal, Patel Joy Pravin Kumar, Nakul Randad, Souvik Kumar Dolui, and Umang Goel. “The Museum Optimization Problem”. Zenodo, April 24, 2021. doi:10.5281/zenodo.4717673.
+
 
 - [Museum-Path-Optimization](#museum-path-optimization)
   - [Group Members](#group-members)
