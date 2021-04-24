@@ -1,5 +1,7 @@
 # Museum-Path-Optimization
 
+[![DOI](https://zenodo.org/badge/346058368.svg)](https://zenodo.org/badge/latestdoi/346058368)
+
 - [Museum-Path-Optimization](#museum-path-optimization)
   - [Group Members](#group-members)
   - [Description](#description)
