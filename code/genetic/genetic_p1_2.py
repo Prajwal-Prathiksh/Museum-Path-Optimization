@@ -198,8 +198,8 @@ def geneticAlgorithm(
 
 if __name__ == '__main__':
 
-    tc_sym = 'asym'
-    tc_number = 2
+    tc_sym = 'sym'
+    tc_number = 1
 
     if tc_sym == 'sym':
         tc_fname = 'Choose_TC_Sym_NPZ.txt'
@@ -228,8 +228,8 @@ if __name__ == '__main__':
 
 geneticAlgorithm(
     population=cityList,
-    popSize=150,
-    eliteSize=15,
-    mutationRate=0.02,
-    generations=200
+    popSize=71,
+    eliteSize=9,
+    mutationRate=0.002,
+    generations=200  # 1500
 )
